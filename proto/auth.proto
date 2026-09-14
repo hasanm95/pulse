@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/hasanm95/pulse/services/auth/proto;authpb";
+
+message HealthRequest {}
+
+message HealthResponse {
+    string status = 1;
+}
+
+service AuthService {
+    rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
