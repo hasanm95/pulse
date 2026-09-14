@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./services/auth:/app
+      - /app/tmp
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${AUTH_DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
