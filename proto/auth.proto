@@ -10,6 +10,19 @@ message HealthResponse {
     string status = 1;
 }
 
+message SignupRequest {
+  string org_name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message SignupResponse {
+  string org_id = 1;
+  string user_id = 2;
+}
+
+
 service AuthService {
     rpc HealthCheck(HealthRequest) returns (HealthResponse);
+    rpc Signup(SignupRequest) returns (SignupResponse);
 }
