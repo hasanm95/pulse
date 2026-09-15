@@ -5,6 +5,7 @@ go 1.25.3
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/jackc/pgx/v5 v5.11.0
+	golang.org/x/crypto v0.55.0
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )

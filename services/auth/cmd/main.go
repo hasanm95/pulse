@@ -12,17 +12,8 @@ import (
 
 	"github.com/hasanm95/pulse/services/auth/internal/config"
 	"github.com/hasanm95/pulse/services/auth/internal/database"
+	"github.com/hasanm95/pulse/services/auth/internal/server"
 )
-
-type server struct {
-	pb.UnimplementedAuthServiceServer
-}
-
-func (s *server) HealthCheck(ctx context.Context, req *pb.HealthRequest) (*pb.HealthResponse, error) {
-	return &pb.HealthResponse{
-		Status: "ok",
-	}, nil
-}
 
 func main() {
 	ctx := context.Background()
@@ -31,8 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println(cfg.Port)
 
 	pool, err := database.New(ctx, cfg.DatabaseURL)
 	if err != nil {
@@ -49,7 +38,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
-	pb.RegisterAuthServiceServer(grpcServer, &server{})
+	pb.RegisterAuthServiceServer(grpcServer, server.New(pool))
 
 	log.Printf("AUTH grpc server started on port %s\n", cfg.Port)
 
