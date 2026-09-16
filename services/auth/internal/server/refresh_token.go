@@ -65,13 +65,13 @@ func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) 
 		return nil, status.Error(codes.Internal, "failed to store refresh token")
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		return nil, status.Error(codes.Internal, "failed to commit transaction")
-	}
-
 	accessToken, err := s.generateAccessToken(userID, orgID, role)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate access token")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Error(codes.Internal, "failed to commit transaction")
 	}
 
 	return &pb.RefreshTokenResponse{

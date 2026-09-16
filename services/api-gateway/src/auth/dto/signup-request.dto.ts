@@ -1,5 +1,4 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { SignupRequest } from "../auth.interface";
 
 export class SignupRequestDto {
     @IsString()
