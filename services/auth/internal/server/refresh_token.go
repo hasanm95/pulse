@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"log"
 
 	pb "github.com/hasanm95/pulse/services/auth/proto"
 
@@ -12,7 +13,10 @@ import (
 )
 
 func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
+	log.Printf("[refresh token] req token %s", req.RefreshToken)
 	hash := hashToken(req.RefreshToken)
+
+	log.Printf("[refresh token] hash %s", hash)
 
 	var userID, orgID, role string
 	err := s.pool.QueryRow(ctx,

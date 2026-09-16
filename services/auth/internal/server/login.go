@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"log"
 	"time"
 
 	pb "github.com/hasanm95/pulse/services/auth/proto"
@@ -90,6 +91,8 @@ func generateRefreshToken() (raw string, hash string, err error) {
 
 	raw = base64.URLEncoding.EncodeToString(bytes)
 	hash = hashToken(raw)
+
+	log.Printf("[login] raw %s, hash %s", raw, hash)
 
 	return raw, hash, nil
 }
