@@ -38,7 +38,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
-	pb.RegisterAuthServiceServer(grpcServer, server.New(pool))
+	pb.RegisterAuthServiceServer(grpcServer, server.New(pool, cfg.SecretKey))
 
 	log.Printf("AUTH grpc server started on port %s\n", cfg.Port)
 

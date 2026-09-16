@@ -8,8 +8,9 @@ import (
 type Server struct {
 	pb.UnimplementedAuthServiceServer
 	pool *pgxpool.Pool
+	secretKey string
 }
 
-func New(pool *pgxpool.Pool) *Server {
-	return &Server{pool: pool}
+func New(pool *pgxpool.Pool, secretKey string) *Server {
+	return &Server{pool: pool, secretKey: secretKey}
 }

@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DatabaseURL string `env:"DATABASE_URL,required"`
 	Port string `env:"PORT" envDefault:"8080"`
+	SecretKey string `env:"SECRET_KEY,required"`
 }
 
 func Load() (*Config, error) {
