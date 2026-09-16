@@ -34,5 +34,21 @@ services:
       db:
         condition: service_healthy
 
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+      - ./proto:/proto:ro
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_URL=auth:8080
+    depends_on:
+      - auth
+
 volumes:
   pgdata:
