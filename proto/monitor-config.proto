@@ -1,0 +1,13 @@
+syntax = "proto3"
+
+package monitor-config
+
+message HealthRequest {}
+
+message HealthResponse {
+    string status = 1;
+}
+
+service MonitorConfigService {
+    rpc HealthCheck(HealthRequest) returns (HealthResponse)
+}

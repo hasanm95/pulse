@@ -51,5 +51,20 @@ services:
     depends_on:
       - auth
 
+  monitor-config:
+    build:
+      context: ./services/monitor-config
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/monitor-config:/app
+      - /app/node_modules
+      - ./proto:/proto:ro
+    environment:
+      - NODE_ENV=development
+      - MONITOR_CONFIG_PROTO_PATH=/proto/monitor-config.proto
+      - MONITOR_CONFIG_SERVICE_URL=0.0.0.0:50052
+
 volumes:
   pgdata:
