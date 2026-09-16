@@ -501,6 +501,110 @@ func (*LogoutResponse) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{9}
 }
 
+type ValidateTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateTokenRequest) Reset() {
+	*x = ValidateTokenRequest{}
+	mi := &file_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateTokenRequest) ProtoMessage() {}
+
+func (x *ValidateTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateTokenRequest.ProtoReflect.Descriptor instead.
+func (*ValidateTokenRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ValidateTokenRequest) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+type ValidateTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	OrgId         string                 `protobuf:"bytes,2,opt,name=org_id,json=orgId,proto3" json:"org_id,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateTokenResponse) Reset() {
+	*x = ValidateTokenResponse{}
+	mi := &file_auth_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateTokenResponse) ProtoMessage() {}
+
+func (x *ValidateTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateTokenResponse.ProtoReflect.Descriptor instead.
+func (*ValidateTokenResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ValidateTokenResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ValidateTokenResponse) GetOrgId() string {
+	if x != nil {
+		return x.OrgId
+	}
+	return ""
+}
+
+func (x *ValidateTokenResponse) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -533,13 +637,20 @@ const file_auth_proto_rawDesc = "" +
 	"expires_in\x18\x02 \x01(\x05R\texpiresIn\"4\n" +
 	"\rLogoutRequest\x12#\n" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"\x10\n" +
-	"\x0eLogoutResponse2\xaa\x02\n" +
+	"\x0eLogoutResponse\"9\n" +
+	"\x14ValidateTokenRequest\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"[\n" +
+	"\x15ValidateTokenResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x15\n" +
+	"\x06org_id\x18\x02 \x01(\tR\x05orgId\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role2\xf4\x02\n" +
 	"\vAuthService\x128\n" +
 	"\vHealthCheck\x12\x13.auth.HealthRequest\x1a\x14.auth.HealthResponse\x123\n" +
 	"\x06Signup\x12\x13.auth.SignupRequest\x1a\x14.auth.SignupResponse\x120\n" +
 	"\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x12E\n" +
 	"\fRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x123\n" +
-	"\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponseB6Z4github.com/hasanm95/pulse/services/auth/proto;authpbb\x06proto3"
+	"\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\x12H\n" +
+	"\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponseB6Z4github.com/hasanm95/pulse/services/auth/proto;authpbb\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once
@@ -553,35 +664,39 @@ func file_auth_proto_rawDescGZIP() []byte {
 	return file_auth_proto_rawDescData
 }
 
-var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_auth_proto_goTypes = []any{
-	(*HealthRequest)(nil),        // 0: auth.HealthRequest
-	(*HealthResponse)(nil),       // 1: auth.HealthResponse
-	(*SignupRequest)(nil),        // 2: auth.SignupRequest
-	(*SignupResponse)(nil),       // 3: auth.SignupResponse
-	(*LoginRequest)(nil),         // 4: auth.LoginRequest
-	(*LoginResponse)(nil),        // 5: auth.LoginResponse
-	(*RefreshTokenRequest)(nil),  // 6: auth.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil), // 7: auth.RefreshTokenResponse
-	(*LogoutRequest)(nil),        // 8: auth.LogoutRequest
-	(*LogoutResponse)(nil),       // 9: auth.LogoutResponse
+	(*HealthRequest)(nil),         // 0: auth.HealthRequest
+	(*HealthResponse)(nil),        // 1: auth.HealthResponse
+	(*SignupRequest)(nil),         // 2: auth.SignupRequest
+	(*SignupResponse)(nil),        // 3: auth.SignupResponse
+	(*LoginRequest)(nil),          // 4: auth.LoginRequest
+	(*LoginResponse)(nil),         // 5: auth.LoginResponse
+	(*RefreshTokenRequest)(nil),   // 6: auth.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),  // 7: auth.RefreshTokenResponse
+	(*LogoutRequest)(nil),         // 8: auth.LogoutRequest
+	(*LogoutResponse)(nil),        // 9: auth.LogoutResponse
+	(*ValidateTokenRequest)(nil),  // 10: auth.ValidateTokenRequest
+	(*ValidateTokenResponse)(nil), // 11: auth.ValidateTokenResponse
 }
 var file_auth_proto_depIdxs = []int32{
-	0, // 0: auth.AuthService.HealthCheck:input_type -> auth.HealthRequest
-	2, // 1: auth.AuthService.Signup:input_type -> auth.SignupRequest
-	4, // 2: auth.AuthService.Login:input_type -> auth.LoginRequest
-	6, // 3: auth.AuthService.RefreshToken:input_type -> auth.RefreshTokenRequest
-	8, // 4: auth.AuthService.Logout:input_type -> auth.LogoutRequest
-	1, // 5: auth.AuthService.HealthCheck:output_type -> auth.HealthResponse
-	3, // 6: auth.AuthService.Signup:output_type -> auth.SignupResponse
-	5, // 7: auth.AuthService.Login:output_type -> auth.LoginResponse
-	7, // 8: auth.AuthService.RefreshToken:output_type -> auth.RefreshTokenResponse
-	9, // 9: auth.AuthService.Logout:output_type -> auth.LogoutResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: auth.AuthService.HealthCheck:input_type -> auth.HealthRequest
+	2,  // 1: auth.AuthService.Signup:input_type -> auth.SignupRequest
+	4,  // 2: auth.AuthService.Login:input_type -> auth.LoginRequest
+	6,  // 3: auth.AuthService.RefreshToken:input_type -> auth.RefreshTokenRequest
+	8,  // 4: auth.AuthService.Logout:input_type -> auth.LogoutRequest
+	10, // 5: auth.AuthService.ValidateToken:input_type -> auth.ValidateTokenRequest
+	1,  // 6: auth.AuthService.HealthCheck:output_type -> auth.HealthResponse
+	3,  // 7: auth.AuthService.Signup:output_type -> auth.SignupResponse
+	5,  // 8: auth.AuthService.Login:output_type -> auth.LoginResponse
+	7,  // 9: auth.AuthService.RefreshToken:output_type -> auth.RefreshTokenResponse
+	9,  // 10: auth.AuthService.Logout:output_type -> auth.LogoutResponse
+	11, // 11: auth.AuthService.ValidateToken:output_type -> auth.ValidateTokenResponse
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_auth_proto_init() }
@@ -595,7 +710,7 @@ func file_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

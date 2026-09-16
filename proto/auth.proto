@@ -47,10 +47,21 @@ message LogoutRequest {
 
 message LogoutResponse {}
 
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  string user_id = 1;
+  string org_id = 2;
+  string role = 3;
+}
+
 service AuthService {
   rpc HealthCheck(HealthRequest) returns (HealthResponse);
   rpc Signup(SignupRequest) returns (SignupResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
 }
