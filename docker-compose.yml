@@ -47,6 +47,7 @@ services:
     environment:
       - NODE_ENV=development
       - AUTH_SERVICE_URL=auth:8080
+      - AUTH_PROTO_PATH=/proto/auth.proto
     depends_on:
       - auth
 

@@ -6,6 +6,7 @@ import { SignupRequestDto } from "./dto/signup-request.dto.js";
 import { RefreshTokenRequestDto } from "./dto/refresh-token.dto.js";
 import { ValidateTokenRequestDto } from "./dto/validate-token-request.dto.js";
 import { LoginRequestDto } from "./dto/login-request.dto.js";
+import { Public } from "../common/decorators/public.decorator.js";
 
 
 @Controller("auth")
@@ -21,12 +22,14 @@ export class AuthController implements OnModuleInit {
         this.authService = this.client.getService<AuthServiceClient>('AuthService')
     }
 
+    @Public()
     @Get('health')
     @HttpCode(HttpStatus.OK)
     healthCheck(): Observable<HealthResponse> {
         return this.authService.healthCheck({});
     }
 
+    @Public()
     @Post("signup") signup(@Body() request: SignupRequestDto): Observable<SignupResponse> { 
         return this.authService.signup({ 
             orgName: request.org_name, 
@@ -35,11 +38,13 @@ export class AuthController implements OnModuleInit {
         }); 
     }
 
+    @Public()
     @Post("login")
     login(@Body() request: LoginRequestDto): Observable<LoginResponse> {
         return this.authService.login(request);
     }
 
+    @Public()
     @Post("refresh-token")
     refreshToken(@Body() request: RefreshTokenRequestDto): Observable<RefreshTokenResponse>{
         return this.authService.refreshToken({
@@ -47,6 +52,7 @@ export class AuthController implements OnModuleInit {
         })
     }
 
+    @Public()
     @Post("logout")
     logout(@Body() request: RefreshTokenRequestDto): Observable<LogoutResponse> {
         return this.authService.logout({
@@ -54,6 +60,7 @@ export class AuthController implements OnModuleInit {
         })
     }
 
+    @Public()
     @Post("validate-token")
     validateToken(@Body() request: ValidateTokenRequestDto): Observable<ValidateTokenResponse> {
         return this.authService.validateToken({
