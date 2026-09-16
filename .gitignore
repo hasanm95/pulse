@@ -7,6 +7,10 @@ tmp/
 /node_modules
 /build
 
+**/**/node_modules
+**/**/build
+**/**/dist
+
 # TypeScript build cache
 *.tsbuildinfo
 
