@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"log"
 
 	pb "github.com/hasanm95/pulse/services/auth/proto"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -13,7 +12,6 @@ import (
 )
 
 func (s *Server) Signup(ctx context.Context, req *pb.SignupRequest) (*pb.SignupResponse, error) {
-	log.Printf("[signup] org name %s", req.OrgName)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to process password")

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
+import { GrpcExceptionFilter } from './common/grpc-exception.filter.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +11,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true
   }))
+  app.useGlobalFilters(new GrpcExceptionFilter());
   await app.listen(3000);
   console.log('API Gateway HTTP server running on port 3000');
 }

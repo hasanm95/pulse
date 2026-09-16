@@ -27,9 +27,18 @@ func (s *Server) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest
 		return nil, status.Error(codes.Internal, "failed to read token claims")
 	}
 
-	userID, _ := claims["user_id"].(string)
-	orgID, _ := claims["org_id"].(string)
-	role, _ := claims["role"].(string)
+	userID, ok := claims["user_id"].(string)
+	if !ok {
+		return nil, status.Error(codes.Internal, "user id is missing")
+	}
+	orgID, ok := claims["org_id"].(string)
+	if !ok {
+		return nil, status.Error(codes.Internal, "org id is missing")
+	}
+	role, ok := claims["role"].(string)
+	if !ok {
+		return nil, status.Error(codes.Internal, "role is missing")
+	}
 
 	return &pb.ValidateTokenResponse{
 		UserId: userID,
@@ -37,3 +46,4 @@ func (s *Server) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest
 		Role:   role,
 	}, nil
 }
+
