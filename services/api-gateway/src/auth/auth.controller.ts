@@ -1,10 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from "@nestjs/common";
-import { AuthServiceClient, HealthResponse, LoginRequest, LoginResponse, LogoutResponse, RefreshTokenResponse, SignupResponse, ValidateTokenResponse } from "./auth.interface.js";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Post } from "@nestjs/common";
+import { AuthServiceClient, HealthResponse, LoginResponse, LogoutResponse, RefreshTokenResponse, SignupResponse, ValidateTokenResponse } from "./auth.interface.js";
 import { ClientGrpc } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 import { SignupRequestDto } from "./dto/signup-request.dto.js";
 import { RefreshTokenRequestDto } from "./dto/refresh-token.dto.js";
 import { ValidateTokenRequestDto } from "./dto/validate-token-request.dto.js";
+import { LoginRequestDto } from "./dto/login-request.dto.js";
 
 
 @Controller("auth")
@@ -20,7 +21,7 @@ export class AuthController implements OnModuleInit {
         this.authService = this.client.getService<AuthServiceClient>('AuthService')
     }
 
-    @Post('health')
+    @Get('health')
     @HttpCode(HttpStatus.OK)
     healthCheck(): Observable<HealthResponse> {
         return this.authService.healthCheck({});
@@ -35,7 +36,7 @@ export class AuthController implements OnModuleInit {
     }
 
     @Post("login")
-    login(@Body() request: LoginRequest): Observable<LoginResponse> {
+    login(@Body() request: LoginRequestDto): Observable<LoginResponse> {
         return this.authService.login(request);
     }
 

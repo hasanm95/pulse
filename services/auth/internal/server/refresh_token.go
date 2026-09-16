@@ -15,14 +15,21 @@ import (
 func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	hash := hashToken(req.RefreshToken)
 
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to start transaction")
+	}
+	defer tx.Rollback(ctx)
+
 	var userID, orgID, role string
 
-	err := s.pool.QueryRow(ctx,
+	err = tx.QueryRow(ctx,
 		`SELECT users.id, users.org_id, users.role
 		 FROM refresh_tokens
 		 JOIN users ON users.id = refresh_tokens.user_id
 		 WHERE refresh_tokens.token_hash = $1
-		   AND refresh_tokens.expires_at > now()`,
+		   AND refresh_tokens.expires_at > now()
+		 FOR UPDATE`,
 		hash,
 	).Scan(&userID, &orgID, &role)
 
@@ -38,12 +45,6 @@ func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate refresh token")
 	}
-
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to start transaction")
-	}
-	defer tx.Rollback(ctx)
 
 	_, err = tx.Exec(ctx,
 		`DELETE FROM refresh_tokens WHERE token_hash = $1`,

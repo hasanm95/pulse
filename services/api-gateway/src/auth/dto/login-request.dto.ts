@@ -1,12 +1,8 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { SignupRequest } from "../auth.interface";
 
-export class SignupRequestDto {
-    @IsString()
-    @IsNotEmpty({message: "Organization name is required"})
-    org_name: string;
-
+export class LoginRequestDto {
     @IsEmail({}, { message: 'Please provide a valid email address' })
+    @IsNotEmpty({ message: 'Email is required' })
     email: string;
 
     @IsString()
