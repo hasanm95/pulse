@@ -27,11 +27,15 @@ export interface UpdateMonitorInput {
   status?: string;
 }
 
+export interface DeleteMonitorInput {
+    id: string;
+}
+
 @Injectable()
 export class MonitorRepository {
     constructor(@Inject("DATABASE_POOL") private readonly pool: Pool) {}
 
-    async create(input: CreateMonitorInput): Promise<Monitor> {
+    async create(data: CreateMonitorInput): Promise<Monitor> {
         const result = await this.pool.query(
             `
                 INSERT INTO monitors (org_id, url, type, interval_seconds, regions, status)
@@ -39,12 +43,12 @@ export class MonitorRepository {
                 RETURNING id, org_id, url, type, interval_seconds, regions, status, created_at, updated_at
             `,
             [
-                input.orgId,
-                input.url,
-                input.type,
-                input.intervalSeconds,
-                input.regions,
-                input.status ?? "active",
+                data.orgId,
+                data.url,
+                data.type,
+                data.intervalSeconds,
+                data.regions,
+                data.status ?? "active",
             ]
         )
 
@@ -78,8 +82,8 @@ export class MonitorRepository {
         return monitors;
     }
 
-    async update(input: UpdateMonitorInput): Promise<Monitor> {
-        const { id, ...fieldsToUpdate } = input;
+    async update(data: UpdateMonitorInput): Promise<Monitor> {
+        const { id, ...fieldsToUpdate } = data;
         
         const setClauses: string[] = [];
         const values: any[] = [id];
@@ -113,6 +117,11 @@ export class MonitorRepository {
         }
 
         return this.toMonitor(result.rows[0]);
+    }
+
+    async delete(data: DeleteMonitorInput) {
+        const result = await this.pool.query("DELETE FROM monitors WHERE id = $1", [data.id])
+        return result.rowCount > 0;
     }
 
     private toMonitor(row: MonitorRow): Monitor {

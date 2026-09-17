@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CreateMonitorInput, GetMonitorInput, ListMonitorsIput, MonitorRepository } from "./monitor.repository.js";
+import { CreateMonitorInput, DeleteMonitorInput, GetMonitorInput, ListMonitorsIput, MonitorRepository } from "./monitor.repository.js";
 import { Monitor, MonitorRow, UpdateMonitorGrpcPayload } from "./monitor.types.js";
 
 
@@ -31,5 +31,13 @@ export class MonitorService {
             regions: data.regions,
             status: data.status,
         });
+    }
+
+    async deleteMonitor(data: DeleteMonitorInput): Promise<void> {
+    const wasDeleted = await this.monitorRepository.delete({ id: data.id });
+    
+    if (!wasDeleted) {
+        throw new Error(`Monitor with ID ${data.id} not found`);
+    }
     }
 }

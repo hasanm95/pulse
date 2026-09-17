@@ -1,7 +1,7 @@
 import { Controller } from "@nestjs/common";
 import { GrpcMethod, RpcException } from "@nestjs/microservices";
 import { MonitorService } from "./monitor.service.js";
-import { CreateMonitorInput, GetMonitorInput, ListMonitorsIput } from "./monitor.repository.js";
+import { CreateMonitorInput, DeleteMonitorInput, GetMonitorInput, ListMonitorsIput } from "./monitor.repository.js";
 import { UpdateMonitorGrpcPayload } from "./monitor.types.js";
 
 
@@ -38,5 +38,11 @@ export class MonitorController {
     @GrpcMethod("MonitorConfigService", "UpdateMonitor")
     async updateMonitor(data: UpdateMonitorGrpcPayload) {
         return await this.monitorService.updateMonitor(data);
+    }
+
+    @GrpcMethod("MonitorConfigService", "DeleteMonitor")
+    async deleteMonitor(data: DeleteMonitorInput) {
+        await this.monitorService.deleteMonitor(data);
+        return {}; 
     }
 }
