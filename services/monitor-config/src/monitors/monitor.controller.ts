@@ -1,7 +1,7 @@
 import { Controller } from "@nestjs/common";
 import { GrpcMethod } from "@nestjs/microservices";
 import { MonitorService } from "./monitor.service.js";
-import { CreateMonitorInput, GetMonitorInput } from "./monitor.repository.js";
+import { CreateMonitorInput, GetMonitorInput, ListMonitorsIput } from "./monitor.repository.js";
 
 
 @Controller()
@@ -23,5 +23,14 @@ export class MonitorController {
     @GrpcMethod("MonitorConfigService", "GetMonitor")
     getMonitor(data: GetMonitorInput){
         return this.monitorService.getMonitor(data)
+    }
+
+    @GrpcMethod("MonitorConfigService", "ListMonitors")
+    async listMonitors(data: ListMonitorsIput) {
+        const monitorsArray = await this.monitorService.listMonitors(data)
+
+        return {
+            monitors: monitorsArray
+        }
     }
 }
