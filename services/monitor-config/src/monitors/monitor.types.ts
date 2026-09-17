@@ -1,18 +1,17 @@
+export type MonitorType = 'http' | 'tcp' | 'ping';
 
-export type MonitorType = "http" | "tcp" | "ping";
-
-export type MonitorStatus = "active" | "paused";
+export type MonitorStatus = 'active' | 'paused';
 
 export interface Monitor {
-    id: string;
-    orgId: string;
-    url: string;
-    type: MonitorType;
-    intervalSeconds: number;
-    regions: string[];
-    status: MonitorStatus;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  orgId: string;
+  url: string;
+  type: MonitorType;
+  intervalSeconds: number;
+  regions: string[];
+  status: MonitorStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MonitorRow {
@@ -27,10 +26,31 @@ export interface MonitorRow {
   updated_at: Date;
 }
 
-export interface UpdateMonitorGrpcPayload {
+export interface CreateMonitorInput {
+  orgId: string;
+  url: string;
+  type: MonitorType;
+  intervalSeconds: number;
+  regions: string[];
+  status?: MonitorStatus;
+}
+
+export interface GetMonitorInput {
+  id: string;
+}
+
+export interface ListMonitorsInput {
+  orgId: string;
+}
+
+export interface UpdateMonitorInput {
   id: string;
   url?: string;
   intervalSeconds?: number;
   regions?: string[];
-  status?: string;
+  status?: MonitorStatus;
+}
+
+export interface DeleteMonitorInput {
+  id: string;
 }

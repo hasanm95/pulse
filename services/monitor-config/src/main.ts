@@ -17,9 +17,7 @@ async function bootstrap() {
         protoPath:
           process.env.MONITOR_CONFIG_PROTO_PATH ||
           join(__dirname, '../../dist/proto/monitor-config.proto'),
-        url:
-          process.env.MONITOR_CONFIG_SERVICE_URL ||
-          '0.0.0.0:50052',
+        url: process.env.MONITOR_CONFIG_SERVICE_URL || '0.0.0.0:50052',
         onLoadPackageDefinition: (packageDefinition, grpcServer) => {
           const reflectionService = new ReflectionService(packageDefinition);
           reflectionService.addToServer(grpcServer);
@@ -30,9 +28,7 @@ async function bootstrap() {
 
   await app.listen();
 
-  console.log(
-    'Monitor Config gRPC microservice is listening on port 50052...',
-  );
+  console.log('Monitor Config gRPC microservice is listening on port 50052...');
 }
 
 await bootstrap();
