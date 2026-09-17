@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CreateMonitorInput, MonitorRepository } from "./monitor.repository.js";
+import { CreateMonitorInput, GetMonitorInput, MonitorRepository } from "./monitor.repository.js";
 import { Monitor, MonitorRow } from "./monitor.types.js";
 
 
@@ -9,5 +9,9 @@ export class MonitorService {
 
     async createMonitor(input: CreateMonitorInput): Promise<Monitor> {
         return this.monitorRepository.create(input)
+    }
+
+    async getMonitor(data: GetMonitorInput): Promise<Monitor> {
+        return this.monitorRepository.getById(data)
     }
 }

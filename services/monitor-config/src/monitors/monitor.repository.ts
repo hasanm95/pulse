@@ -11,6 +11,10 @@ export interface CreateMonitorInput {
     status?: MonitorStatus;
 }
 
+export interface GetMonitorInput {
+    id: string;
+}
+
 @Injectable()
 export class MonitorRepository {
     constructor(@Inject("DATABASE_POOL") private readonly pool: Pool) {}
@@ -47,5 +51,16 @@ export class MonitorRepository {
             createdAt: row.created_at,
             updatedAt: row.updated_at,
         }
+    }
+
+    async getById(data: GetMonitorInput): Promise<Monitor> {
+        const result = await this.pool.query(
+            `SELECT id, org_id, url, type, interval_seconds, regions, status, created_at, updated_at FROM monitors WHERE id = $1`,
+            [data.id]
+        )
+
+        console.log(result)
+
+        return this.toMonitor(result.rows[0])
     }
 }
