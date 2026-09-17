@@ -1,20 +1,24 @@
-import { Global, Module } from "@nestjs/common";
-import { Pool } from "pg";
-
+import { Global, Module } from '@nestjs/common';
+import { Pool } from 'pg';
+import { MigrationService } from './migration.service.js';
 
 @Global()
 @Module({
     providers: [
         {
             provide: 'DATABASE_POOL',
-            useFactory: () => {
-                return new Pool({
+            useFactory: async () => {
+                const pool = new Pool({
                     connectionString: process.env.DATABASE_URL,
-                })
-            }
-        }
-    ],
-    exports: ['DATABASE_POOL']
-})
+                });
 
+                await pool.query('SELECT 1');
+
+                return pool;
+            },
+        },
+        MigrationService
+    ],
+    exports: ['DATABASE_POOL', MigrationService]
+})
 export class DatabaseModule {}

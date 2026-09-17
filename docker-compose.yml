@@ -6,6 +6,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - MONITOR_CONFIG_DB_NAME=${MONITOR_CONFIG_DB_NAME}
     ports:
       - "5433:5432"
     volumes:
