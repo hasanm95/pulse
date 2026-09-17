@@ -46,8 +46,9 @@ services:
       - ./proto:/proto:ro
     environment:
       - NODE_ENV=development
-      - AUTH_SERVICE_URL=auth:8080
       - AUTH_PROTO_PATH=/proto/auth.proto
+      - AUTH_SERVICE_URL=auth:8080
+      - MONITOR_CONFIG_SERVICE_URL=monitor-config:50052
     depends_on:
       - auth
 
@@ -56,7 +57,7 @@ services:
       context: ./services/monitor-config
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "50052:50052"
     volumes:
       - ./services/monitor-config:/app
       - /app/node_modules
@@ -65,6 +66,9 @@ services:
       - NODE_ENV=development
       - MONITOR_CONFIG_PROTO_PATH=/proto/monitor-config.proto
       - MONITOR_CONFIG_SERVICE_URL=0.0.0.0:50052
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:

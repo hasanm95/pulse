@@ -1,6 +1,6 @@
-syntax = "proto3"
+syntax = "proto3";
 
-package monitor-config
+package monitor-config;
 
 message HealthRequest {}
 
@@ -9,5 +9,5 @@ message HealthResponse {
 }
 
 service MonitorConfigService {
-    rpc HealthCheck(HealthRequest) returns (HealthResponse)
+    rpc HealthCheck(HealthRequest) returns (HealthResponse);
 }
