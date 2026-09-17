@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import {
   CreateMonitorInput,
   DeleteMonitorInput,
@@ -9,6 +8,7 @@ import {
   UpdateMonitorInput,
 } from './monitor.types.js';
 import { MonitorRepository } from './monitor.repository.js';
+import { GrpcError } from '../common/errors/grpc-error.js';
 
 @Injectable()
 export class MonitorService {
@@ -22,10 +22,7 @@ export class MonitorService {
     const monitor = await this.monitorRepository.getById(data);
 
     if (!monitor) {
-      throw new RpcException({
-        code: 5,
-        message: `Monitor with ID ${data.id} not found`,
-      });
+      throw GrpcError.notFound(`Monitor with ID ${data.id} not found`);
     }
 
     return monitor;
@@ -36,21 +33,10 @@ export class MonitorService {
   }
 
   async updateMonitor(data: UpdateMonitorInput): Promise<Monitor> {
-    const input: UpdateMonitorInput = {
-      ...data,
-      intervalSeconds:
-        data.intervalSeconds !== undefined
-          ? Math.max(data.intervalSeconds, 10)
-          : undefined,
-    };
-
-    const monitor = await this.monitorRepository.update(input);
+    const monitor = await this.monitorRepository.update(data);
 
     if (!monitor) {
-      throw new RpcException({
-        code: 5,
-        message: `Monitor with ID ${data.id} not found`,
-      });
+      throw GrpcError.notFound(`Monitor with ID ${data.id} not found`);
     }
 
     return monitor;
@@ -60,10 +46,7 @@ export class MonitorService {
     const wasDeleted = await this.monitorRepository.delete(data);
 
     if (!wasDeleted) {
-      throw new RpcException({
-        code: 5,
-        message: `Monitor with ID ${data.id} not found`,
-      });
+      throw GrpcError.notFound(`Monitor with ID ${data.id} not found`);
     }
   }
 }
