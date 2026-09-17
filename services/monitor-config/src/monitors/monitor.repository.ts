@@ -19,6 +19,14 @@ export interface ListMonitorsIput {
     orgId: string;
 }
 
+export interface UpdateMonitorInput {
+  id: string;
+  url?: string;
+  interval_seconds?: number;
+  regions?: string[];
+  status?: string;
+}
+
 @Injectable()
 export class MonitorRepository {
     constructor(@Inject("DATABASE_POOL") private readonly pool: Pool) {}
@@ -68,6 +76,43 @@ export class MonitorRepository {
         }
         
         return monitors;
+    }
+
+    async update(input: UpdateMonitorInput): Promise<Monitor> {
+        const { id, ...fieldsToUpdate } = input;
+        
+        const setClauses: string[] = [];
+        const values: any[] = [id];
+        let paramIndex = 2;
+
+        Object.entries(fieldsToUpdate).forEach(([key, value]) => {
+            if (value !== undefined) {
+                setClauses.push(`${key} = \$${paramIndex}`);
+                values.push(value);
+                paramIndex++;
+            }
+        });
+
+        if (setClauses.length === 0) {
+            const existing = await this.getById({ id });
+            if (!existing) throw new Error(`Monitor with ID ${id} not found`);
+            return existing;
+        }
+
+        const query = `
+            UPDATE monitors 
+            SET ${setClauses.join(', ')}, updated_at = NOW()
+            WHERE id = $1
+            RETURNING id, org_id, url, type, interval_seconds, regions, status, created_at, updated_at
+        `;
+
+        const result = await this.pool.query(query, values);
+        
+        if (result.rowCount === 0) {
+            throw new Error(`Monitor with ID ${id} not found`);
+        }
+
+        return this.toMonitor(result.rows[0]);
     }
 
     private toMonitor(row: MonitorRow): Monitor {

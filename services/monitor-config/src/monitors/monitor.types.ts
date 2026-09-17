@@ -26,3 +26,11 @@ export interface MonitorRow {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface UpdateMonitorGrpcPayload {
+  id: string;
+  url?: string;
+  intervalSeconds?: number;
+  regions?: string[];
+  status?: string;
+}
