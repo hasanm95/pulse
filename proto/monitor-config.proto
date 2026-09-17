@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package monitor-config;
+package monitor_config;
 
 message HealthRequest {}
 
