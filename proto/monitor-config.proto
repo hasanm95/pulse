@@ -5,9 +5,65 @@ package monitor_config;
 message HealthRequest {}
 
 message HealthResponse {
-    string status = 1;
+  string status = 1;
 }
 
+message Monitor {
+  string id = 1;
+  string org_id = 2;
+  string url = 3;
+  string type = 4;
+  int32 interval_seconds = 5;
+  repeated string regions = 6;
+  string status = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message CreateMonitorRequest {
+  string org_id = 1;
+  string url = 2;
+  string type = 3;
+  int32 interval_seconds = 4;
+  repeated string regions = 5;
+}
+
+message GetMonitorRequest {
+  string id = 1;
+}
+
+message ListMonitorsRequest {
+  string org_id = 1;
+}
+
+message ListMonitorsResponse {
+  repeated Monitor monitors = 1;
+}
+
+message UpdateMonitorRequest {
+  string id = 1;
+  optional string url = 2;
+  optional int32 interval_seconds = 3;
+  repeated string regions = 4;
+  optional string status = 5;
+}
+
+message DeleteMonitorRequest {
+  string id = 1;
+}
+
+message Empty {}
+
 service MonitorConfigService {
-    rpc HealthCheck(HealthRequest) returns (HealthResponse);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+
+  rpc CreateMonitor(CreateMonitorRequest) returns (Monitor);
+
+  rpc GetMonitor(GetMonitorRequest) returns (Monitor);
+
+  rpc ListMonitors(ListMonitorsRequest) returns (ListMonitorsResponse);
+
+  rpc UpdateMonitor(UpdateMonitorRequest) returns (Monitor);
+
+  rpc DeleteMonitor(DeleteMonitorRequest) returns (Empty);
 }
