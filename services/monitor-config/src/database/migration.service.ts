@@ -42,22 +42,23 @@ export class MigrationService implements OnModuleInit {
 
       const sql = await readFile(join(migrationsDir, file), 'utf8');
 
-      await this.pool.query('BEGIN');
+      const client = await this.pool.connect();
 
       try {
-        await this.pool.query(sql);
-
-        await this.pool.query(
+        await client.query('BEGIN');
+        await client.query(sql);
+        await client.query(
           `INSERT INTO schema_migrations (version) VALUES ($1)`,
           [version],
         );
-
-        await this.pool.query('COMMIT');
+        await client.query('COMMIT');
 
         console.log(`Migration applied: ${file}`);
       } catch (error) {
-        await this.pool.query('ROLLBACK');
+        await client.query('ROLLBACK');
         throw error;
+      } finally {
+        client.release();
       }
     }
   }
