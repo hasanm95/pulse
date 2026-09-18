@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Patch, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import { ClientGrpc } from "@nestjs/microservices";
-import { HealthResponse, ListMonitorsRequest, ListMonitorsResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
+import { Empty, HealthResponse, ListMonitorsRequest, ListMonitorsResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
 import { Public } from "../common/decorators/public.decorator.js";
 import { Observable } from "rxjs";
 import { CreateMonitorRequestDto, MonitorParamDto, UpdateMonitorRequestDto } from "./dto/monitor.dto.js";
@@ -65,6 +65,15 @@ export class MonitorConfigController implements OnModuleInit {
             intervalSeconds: reqBody.intervalSeconds,
             regions: reqBody.regions,
             status: reqBody.status
+        })
+    }
+
+    @Delete("monitors/:id")
+    deleteMonitor(@Req() request: Request, @Param() param: MonitorParamDto): Observable<Empty> {
+        const orgId = request["user"].orgId
+        return this.monitorConfigService.deleteMonitor({
+            id: param.id,
+            orgId: orgId
         })
     }
 }

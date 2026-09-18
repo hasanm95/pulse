@@ -49,10 +49,18 @@ export interface UpdateMonitorRequest {
     status?: string;
 }
 
+export interface DeleteMonitorRequest {
+    id: string;
+    orgId: string;
+}
+
+export interface Empty {}
+
 export interface MonitorConfigServiceClient {
     healthCheck(request: HealthRequest): Observable<HealthResponse>;
     createMonitor(request: CreateMonitorRequest): Observable<Monitor>;
     getMonitor(request: GetMonitorRequest): Observable<Monitor>;
     listMonitors(request: ListMonitorsRequest): Observable<ListMonitorsResponse>;
     updateMonitor(request: UpdateMonitorRequest): Observable<Monitor>;
+    deleteMonitor(request: DeleteMonitorRequest): Observable<Empty>
 }
