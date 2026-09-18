@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import { ClientGrpc } from "@nestjs/microservices";
 import { HealthResponse, ListMonitorsRequest, ListMonitorsResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
 import { Public } from "../common/decorators/public.decorator.js";
 import { Observable } from "rxjs";
-import { CreateMonitorRequestDto, GetMonitorParamDto } from "./dto/monitor.dto.js";
+import { CreateMonitorRequestDto, MonitorParamDto, UpdateMonitorRequestDto } from "./dto/monitor.dto.js";
 
 
 @Controller("monitor-config")
@@ -39,7 +39,7 @@ export class MonitorConfigController implements OnModuleInit {
     }
 
     @Get("monitors/:id")
-    getMonitor(@Req() request: Request, @Param() param: GetMonitorParamDto): Observable<Monitor>  {
+    getMonitor(@Req() request: Request, @Param() param: MonitorParamDto): Observable<Monitor>  {
         const orgId = request["user"].orgId
         return this.monitorConfigService.getMonitor({
             id: param.id,
@@ -52,6 +52,19 @@ export class MonitorConfigController implements OnModuleInit {
         const orgId = request["user"].orgId
         return this.monitorConfigService.listMonitors({
             orgId: orgId
+        })
+    }
+
+    @Patch("monitors/:id")
+    updateMonitor(@Req() request: Request, @Param() param: MonitorParamDto, @Body() reqBody: UpdateMonitorRequestDto): Observable<Monitor> {
+        const orgId = request["user"].orgId
+        return this.monitorConfigService.updateMonitor({
+            id: param.id,
+            orgId: orgId,
+            url: reqBody.url,
+            intervalSeconds: reqBody.intervalSeconds,
+            regions: reqBody.regions,
+            status: reqBody.status
         })
     }
 }

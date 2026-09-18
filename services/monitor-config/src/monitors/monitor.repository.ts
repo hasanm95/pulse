@@ -146,6 +146,10 @@ export class MonitorRepository {
       }
 
       values.push(data.id);
+      const idPlaceholder = `$${values.length}`;
+
+      values.push(data.orgId);
+      const orgIdPlaceholder = `$${values.length}`;
 
       const result = await this.pool.query<MonitorRow>(
         `
@@ -153,7 +157,7 @@ export class MonitorRepository {
           SET
             ${setClauses.join(', ')},
             updated_at = NOW()
-          WHERE id = $${values.length} AND org_id = $${data.orgId}
+          WHERE id =  ${idPlaceholder} AND org_id = ${orgIdPlaceholder}
           RETURNING
             id,
             org_id,
