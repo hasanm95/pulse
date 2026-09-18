@@ -53,6 +53,7 @@ services:
       - MONITOR_CONFIG_PROTO_PATH=/proto/monitor-config.proto
     depends_on:
       - auth
+      - monitor-config
 
   monitor-config:
     build:
