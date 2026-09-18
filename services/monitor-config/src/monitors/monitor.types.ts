@@ -37,6 +37,7 @@ export interface CreateMonitorInput {
 
 export interface GetMonitorInput {
   id: string;
+  orgId: string;
 }
 
 export interface ListMonitorsInput {
@@ -45,6 +46,7 @@ export interface ListMonitorsInput {
 
 export interface UpdateMonitorInput {
   id: string;
+  orgId: string;
   url?: string;
   intervalSeconds?: number;
   regions?: string[];
@@ -53,4 +55,5 @@ export interface UpdateMonitorInput {
 
 export interface DeleteMonitorInput {
   id: string;
+  orgId: string;
 }

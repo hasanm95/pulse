@@ -15,6 +15,7 @@ export class CreateMonitorDto {
   orgId!: string;
 
   @IsNotEmpty()
+  @IsUrl()
   url!: string;
 
   @IsIn(['http', 'tcp', 'ping'])
@@ -31,6 +32,9 @@ export class CreateMonitorDto {
 export class GetMonitorDto {
   @IsUUID()
   id!: string;
+
+  @IsUUID()
+  orgId!: string;
 }
 
 export class ListMonitorsDto {
@@ -42,8 +46,12 @@ export class UpdateMonitorDto {
   @IsUUID()
   id!: string;
 
+  @IsUUID()
+  orgId!: string;
+
   @IsOptional()
   @IsNotEmpty()
+  @IsUrl()
   url?: string;
 
   @IsOptional()
@@ -63,4 +71,7 @@ export class UpdateMonitorDto {
 export class DeleteMonitorDto {
   @IsUUID()
   id!: string;
+
+  @IsUUID()
+  orgId!: string;
 }

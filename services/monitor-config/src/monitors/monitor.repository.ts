@@ -75,9 +75,9 @@ export class MonitorRepository {
             created_at,
             updated_at
           FROM monitors
-          WHERE id = $1
+          WHERE id = $1 AND org_id = $2
         `,
-        [data.id],
+        [data.id, data.orgId],
       );
 
       if (result.rowCount === 0) {
@@ -142,7 +142,7 @@ export class MonitorRepository {
       }
 
       if (setClauses.length === 0) {
-        return this.getById({ id: data.id });
+        return this.getById({ id: data.id, orgId: data.orgId });
       }
 
       values.push(data.id);
@@ -153,7 +153,7 @@ export class MonitorRepository {
           SET
             ${setClauses.join(', ')},
             updated_at = NOW()
-          WHERE id = $${values.length}
+          WHERE id = $${values.length} AND org_id = $${data.orgId}
           RETURNING
             id,
             org_id,
@@ -184,9 +184,9 @@ export class MonitorRepository {
       const result = await this.pool.query(
         `
           DELETE FROM monitors
-          WHERE id = $1
+          WHERE id = $1 AND org_id = $2
         `,
-        [data.id],
+        [data.id, data.orgId],
       );
 
       return result.rowCount > 0;

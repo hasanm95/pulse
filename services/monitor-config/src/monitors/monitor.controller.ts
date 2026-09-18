@@ -57,12 +57,14 @@ export class MonitorController {
     @Payload(
       new GrpcValidationPipe(GetMonitorDto, (value: any) => ({
         id: value.id,
+        orgId: value.orgId
       })),
     )
     data: GetMonitorDto,
   ) {
     const input: GetMonitorInput = {
       id: data.id,
+      orgId: data.orgId
     };
 
     return this.monitorService.getMonitor(input);
@@ -93,6 +95,7 @@ export class MonitorController {
     @Payload(
       new GrpcValidationPipe(UpdateMonitorDto, (value: any) => ({
         id: value.id,
+        orgId: value.orgId,
         url: value.url,
         intervalSeconds: value.intervalSeconds,
         regions: value.regions,
@@ -103,6 +106,7 @@ export class MonitorController {
   ) {
     const input: UpdateMonitorInput = {
       id: data.id,
+      orgId: data.orgId,
       url: data.url,
       intervalSeconds: data.intervalSeconds,
       regions: data.regions,
@@ -117,12 +121,14 @@ export class MonitorController {
     @Payload(
       new GrpcValidationPipe(DeleteMonitorDto, (value: any) => ({
         id: value.id,
+        orgId: value.orgId
       })),
     )
     data: DeleteMonitorDto,
   ) {
     const input: DeleteMonitorInput = {
       id: data.id,
+      orgId: data.orgId
     };
 
     await this.monitorService.deleteMonitor(input);

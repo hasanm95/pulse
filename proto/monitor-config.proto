@@ -30,6 +30,7 @@ message CreateMonitorRequest {
 
 message GetMonitorRequest {
   string id = 1;
+  string org_id = 1;
 }
 
 message ListMonitorsRequest {
@@ -42,6 +43,7 @@ message ListMonitorsResponse {
 
 message UpdateMonitorRequest {
   string id = 1;
+  string org_id = 1;
   optional string url = 2;
   optional int32 interval_seconds = 3;
   repeated string regions = 4;
@@ -50,6 +52,7 @@ message UpdateMonitorRequest {
 
 message DeleteMonitorRequest {
   string id = 1;
+  string org_id = 1;
 }
 
 message Empty {}
