@@ -15,3 +15,8 @@ export class CreateMonitorRequestDto {
     @IsArray()
     regions: string[];
 }
+
+export class GetMonitorParamDto {
+    @IsUUID()
+    id!: string;
+}

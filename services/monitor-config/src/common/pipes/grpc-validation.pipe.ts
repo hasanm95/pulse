@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { validate, ValidationError } from 'class-validator';
 import { GrpcError } from '../errors/grpc-error.js';
 

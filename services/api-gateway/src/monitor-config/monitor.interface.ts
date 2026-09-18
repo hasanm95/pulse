@@ -27,7 +27,13 @@ export interface CreateMonitorRequest {
     regions: string[];
 }
 
+export interface GetMonitorRequest {
+    id: string;
+    orgId: string;
+}
+
 export interface MonitorConfigServiceClient {
     healthCheck(request: HealthRequest): Observable<HealthResponse>;
     createMonitor(request: CreateMonitorRequest): Observable<Monitor>;
+    getMonitor(request: GetMonitorRequest): Observable<Monitor>;
 }

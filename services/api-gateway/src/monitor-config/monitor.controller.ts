@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Post, Query, Req } from "@nestjs/common";
 import { ClientGrpc } from "@nestjs/microservices";
 import { HealthResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
 import { Public } from "../common/decorators/public.decorator.js";
 import { Observable } from "rxjs";
-import { CreateMonitorRequestDto } from "./dto/create-monitor-request.dto.js";
+import { CreateMonitorRequestDto, GetMonitorParamDto } from "./dto/monitor.dto.js";
 
 
 @Controller("monitor-config")
@@ -35,6 +35,15 @@ export class MonitorConfigController implements OnModuleInit {
             type: reqBody.type,
             regions: reqBody.regions,
             intervalSeconds: reqBody.interval_seconds
+        })
+    }
+
+    @Get("monitors/:id")
+    getMonitor(@Req() request: Request, @Param() param: GetMonitorParamDto): Observable<Monitor>  {
+        const orgId = request["user"].orgId
+        return this.monitorConfigService.getMonitor({
+            id: param.id,
+            orgId: orgId
         })
     }
 }
