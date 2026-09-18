@@ -9,10 +9,10 @@ export interface HealthResponse {
 
 export interface Monitor {
     id: string;
-    org_id: string;
+    orgId: string;
     url: string;
     type: string;
-    interval_seconds: number;
+    intervalSeconds: number;
     regions: string[];
     status: string;
     created_at: string;
@@ -37,7 +37,7 @@ export interface ListMonitorsRequest {
 }
 
 export interface ListMonitorsResponse {
-   monitors: string[];
+   monitors: Monitor[];
 }
 
 export interface UpdateMonitorRequest {
