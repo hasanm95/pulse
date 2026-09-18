@@ -10,7 +10,7 @@ export class CreateMonitorRequestDto {
 
     @IsInt()
     @Min(10)
-    interval_seconds: number;
+    intervalSeconds: number;
 
     @IsArray()
     regions: string[];

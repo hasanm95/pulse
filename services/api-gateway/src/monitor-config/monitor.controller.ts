@@ -35,7 +35,7 @@ export class MonitorConfigController implements OnModuleInit {
             url: reqBody.url,
             type: reqBody.type,
             regions: reqBody.regions,
-            intervalSeconds: reqBody.interval_seconds
+            intervalSeconds: reqBody.intervalSeconds
         })
     }
 
