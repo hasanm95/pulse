@@ -22,6 +22,19 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           },
         }),
       },
+      {
+        name: 'MONITOR_CONFIG_PACKAGE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: 'monitor_config',
+            protoPath: configService.get('MONITOR_CONFIG_PROTO_PATH', '/proto/monitor-config.proto'),
+            url: configService.get<string>('MONITOR_CONFIG_SERVICE_URL', 'localhost:50052'),
+          },
+        }),
+      },
     ]),
   ],
   exports: [ClientsModule],

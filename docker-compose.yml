@@ -50,6 +50,7 @@ services:
       - AUTH_PROTO_PATH=/proto/auth.proto
       - AUTH_SERVICE_URL=auth:8080
       - MONITOR_CONFIG_SERVICE_URL=monitor-config:50052
+      - MONITOR_CONFIG_PROTO_PATH=/proto/monitor-config.proto
     depends_on:
       - auth
 
