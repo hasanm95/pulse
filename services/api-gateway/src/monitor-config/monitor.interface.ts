@@ -32,8 +32,17 @@ export interface GetMonitorRequest {
     orgId: string;
 }
 
+export interface ListMonitorsRequest {
+   orgId: string;
+}
+
+export interface ListMonitorsResponse {
+   monitors: string[];
+}
+
 export interface MonitorConfigServiceClient {
     healthCheck(request: HealthRequest): Observable<HealthResponse>;
     createMonitor(request: CreateMonitorRequest): Observable<Monitor>;
     getMonitor(request: GetMonitorRequest): Observable<Monitor>;
+    listMonitors(request: ListMonitorsRequest): Observable<ListMonitorsResponse>;
 }

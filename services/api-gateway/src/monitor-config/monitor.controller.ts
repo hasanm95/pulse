@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, OnModuleInit, Param, Post, Query, Req } from "@nestjs/common";
 import { ClientGrpc } from "@nestjs/microservices";
-import { HealthResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
+import { HealthResponse, ListMonitorsRequest, ListMonitorsResponse, Monitor, MonitorConfigServiceClient } from "./monitor.interface.js";
 import { Public } from "../common/decorators/public.decorator.js";
 import { Observable } from "rxjs";
 import { CreateMonitorRequestDto, GetMonitorParamDto } from "./dto/monitor.dto.js";
@@ -43,6 +43,14 @@ export class MonitorConfigController implements OnModuleInit {
         const orgId = request["user"].orgId
         return this.monitorConfigService.getMonitor({
             id: param.id,
+            orgId: orgId
+        })
+    }
+
+    @Get("monitors")
+    listMonitors(@Req() request: Request): Observable<ListMonitorsResponse> {
+        const orgId = request["user"].orgId
+        return this.monitorConfigService.listMonitors({
             orgId: orgId
         })
     }
