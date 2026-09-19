@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod, Payload } from '@nestjs/microservices';
+import { Controller, Inject } from '@nestjs/common';
+import { ClientProxy, GrpcMethod, Payload } from '@nestjs/microservices';
 import { MonitorService } from './monitor.service.js';
 import {
   CreateMonitorDto,
@@ -19,7 +19,10 @@ import { GrpcValidationPipe } from '../common/pipes/grpc-validation.pipe.js';
 
 @Controller()
 export class MonitorController {
-  constructor(private readonly monitorService: MonitorService) {}
+  constructor(
+    private readonly monitorService: MonitorService,
+    @Inject('RABBITMQ_CLIENT') private readonly client: ClientProxy
+  ) {}
 
   @GrpcMethod('MonitorConfigService', 'HealthCheck')
   healthCheck() {
@@ -29,7 +32,7 @@ export class MonitorController {
   }
 
   @GrpcMethod('MonitorConfigService', 'CreateMonitor')
-  createMonitor(
+  async createMonitor(
     @Payload(
       new GrpcValidationPipe(CreateMonitorDto, (value: any) => ({
         orgId: value.orgId,
@@ -49,7 +52,9 @@ export class MonitorController {
       regions: data.regions,
     };
 
-    return this.monitorService.createMonitor(input);
+    const newMonitor = await this.monitorService.createMonitor(input);
+    this.client.emit('monitor.created', newMonitor)
+    return newMonitor
   }
 
   @GrpcMethod('MonitorConfigService', 'GetMonitor')
@@ -91,7 +96,7 @@ export class MonitorController {
   }
 
   @GrpcMethod('MonitorConfigService', 'UpdateMonitor')
-  updateMonitor(
+  async updateMonitor(
     @Payload(
       new GrpcValidationPipe(UpdateMonitorDto, (value: any) => ({
         id: value.id,
@@ -113,7 +118,10 @@ export class MonitorController {
       status: data.status,
     };
 
-    return this.monitorService.updateMonitor(input);
+    const updatedMonitor = this.monitorService.updateMonitor(input);
+    this.client.emit('monitor.updated', updatedMonitor)
+
+    return updatedMonitor
   }
 
   @GrpcMethod('MonitorConfigService', 'DeleteMonitor')
@@ -132,6 +140,7 @@ export class MonitorController {
     };
 
     await this.monitorService.deleteMonitor(input);
+    this.client.emit('monitor.deleted', {id: data.id, orgId: data.orgId})
 
     return {};
   }
