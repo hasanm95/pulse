@@ -46,22 +46,7 @@ func main() {
 	defer ch.Close()
 
 	// Process incoming channel deliveries continuously
-	go func(ctx context.Context) {
-		log.Println("Listening for fanout events...")
-		for {
-			select {
-			case <-ctx.Done():
-				log.Println("Stopping worker loop...")
-				return
-			case d, ok := <-msgs:
-				if !ok {
-					log.Println("RabbitMQ message channel closed.")
-					return
-				}
-    			log.Printf("🔥 Raw Packet from NestJS: %s\n", string(d.Body))
-			}
-		}
-	}(ctx)
+	go consumer.ProcessMessages(ctx, msgs)
 
 	// Block main process thread until system interrupt (Ctrl+C / Docker Stop)
 	<-ctx.Done()

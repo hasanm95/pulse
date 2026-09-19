@@ -63,7 +63,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 	msgs, err := rabbitChan.Consume(
 		q.Name,
 		"",
-		true, // auto-ack for simple debugging
+		false,
 		false,
 		false,
 		false,
