@@ -49,6 +49,11 @@ func main() {
 	defer conn.Close()
 	defer ch.Close()
 
+	// init engine
+	engine := scheduler.NewEngine(rdb, ch)
+
+	go engine.Start(ctx)
+
 	// Process incoming channel deliveries continuously
 	go consumer.ProcessMessages(ctx, msgs, stroe)
 
