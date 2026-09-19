@@ -118,7 +118,7 @@ export class MonitorController {
       status: data.status,
     };
 
-    const updatedMonitor = this.monitorService.updateMonitor(input);
+    const updatedMonitor = await this.monitorService.updateMonitor(input);
     this.client.emit('monitor.updated', updatedMonitor)
 
     return updatedMonitor

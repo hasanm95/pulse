@@ -9,8 +9,8 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
                 name: 'RABBITMQ_CLIENT',
                 transport: Transport.RMQ,
                 options: {
-                    urls: [process.env.RABBITMQ_URL || 'amqp://admin:securepassword123@localhost:5672'],
-                    queue: '',
+                    urls: [process.env.RABBITMQ_URL || 'amqp://admin:securepassword123@rabbitmq:5672'],
+                    queue: 'monitor_config_publisher_queue',
                     queueOptions: {
                         exchange: 'monitor_events',
                         exchangeType: 'fanout',
