@@ -8,6 +8,7 @@ import (
 
 	"github.com/hasanm95/pulse/services/scheduler/internal/config"
 	"github.com/hasanm95/pulse/services/scheduler/internal/consumer"
+	"github.com/hasanm95/pulse/services/scheduler/internal/scheduler"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -37,6 +38,9 @@ func main() {
 	}
 	log.Println("Successfully connected to Redis!")
 
+	// Connect Schedulre
+	stroe := scheduler.NewStorage(rdb)
+
 	// Rabbitmq setup
 
 	// Start the consumer infrastructure
@@ -46,7 +50,7 @@ func main() {
 	defer ch.Close()
 
 	// Process incoming channel deliveries continuously
-	go consumer.ProcessMessages(ctx, msgs)
+	go consumer.ProcessMessages(ctx, msgs, stroe)
 
 	// Block main process thread until system interrupt (Ctrl+C / Docker Stop)
 	<-ctx.Done()

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/hasanm95/pulse/services/scheduler/internal/scheduler"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -23,7 +24,7 @@ type MonitorDeletedPayload struct {
 	OrgID string `json:"orgId"`
 }
 
-func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery) {
+func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery, store *scheduler.Storage) {
 	log.Println("Listening for fanout events...")
 	
 	for {
@@ -47,8 +48,12 @@ func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery) {
 					continue
 				}
 				
-				log.Printf("Parsed %s event -> ID: %s, Interval: %ds, URL: %s", 
-					d.RoutingKey, event.ID, event.IntervalSeconds, event.URL)
+				err = store.SaveSchedule(ctx, event.ID, event.IntervalSeconds)
+				if err != nil {
+					log.Printf("Failed to commit schedule to Redis: %v", err)
+					continue
+				}
+				log.Printf("Safely scheduled Monitor %s in Redis (Interval: %ds)", event.ID, event.IntervalSeconds)
 				
 
 			case "monitor.deleted":
@@ -59,7 +64,12 @@ func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery) {
 					continue
 				}
 				
-				log.Printf("Parsed monitor.deleted event -> ID: %s, OrgID: %s", event.ID, event.OrgID)
+				err = store.RemoveSchedule(ctx, event.ID)
+				if err != nil {
+					log.Printf("Failed to remove schedule from Redis: %v", err)
+					continue
+				}
+				log.Printf("Safely removed Monitor %s from Redis tracking pool", event.ID)
 				
 
 			default:
