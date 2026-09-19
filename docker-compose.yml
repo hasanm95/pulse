@@ -42,11 +42,11 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --requirepass $$REDIS_PASS 
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASS}  
     volumes:
       - redis_data:/data 
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", $$REDIS_PASS, "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASS}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -122,6 +122,13 @@ services:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
       - REDIS_ADDR=redis:6379
       - REDIS_PASS=${REDIS_PASS}
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:

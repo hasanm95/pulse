@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"log"
+	"os/signal"
+	"syscall"
 
 	"github.com/hasanm95/pulse/services/scheduler/internal/config"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/hasanm95/pulse/services/scheduler/internal/consumer"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -16,6 +18,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Listen for termination signals directly in main
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	// Redis setup
 	log.Println("Connection to redis")
@@ -32,35 +38,32 @@ func main() {
 	log.Println("Successfully connected to Redis!")
 
 	// Rabbitmq setup
+
+	// Start the consumer infrastructure
 	log.Println("Connecting to RabbitMQ...")
+	conn, ch, msgs := consumer.Start(ctx, cfg.RabbitMQURL)
+	defer conn.Close()
+	defer ch.Close()
 
-	rabbitConn, err := amqp.Dial(cfg.RabbitMQURL)
-	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
-	}
-	defer rabbitConn.Close()
+	// Process incoming channel deliveries continuously
+	go func(ctx context.Context) {
+		log.Println("Listening for fanout events...")
+		for {
+			select {
+			case <-ctx.Done():
+				log.Println("Stopping worker loop...")
+				return
+			case d, ok := <-msgs:
+				if !ok {
+					log.Println("RabbitMQ message channel closed.")
+					return
+				}
+				log.Printf("🔥 Received Event Payload: %s\n", string(d.Body))
+			}
+		}
+	}(ctx)
 
-	rabbitChan, err := rabbitConn.Channel()
-	if err != nil {
-		log.Fatalf("Failed to open a RabbitMQ channel: %v", err)
-	}
-	defer rabbitChan.Close()
-
-	log.Println("Successfully connected to RabbitMQ!")
-
-	// Fanout exchange declaration
-	rabbitChan.ExchangeDeclare(
-		"monitor_events",
-		"fanout",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Fatalf("Failed to declare fanout exchange: %v", err)
-	}
-	log.Println("Fanout exchange 'monitor_events' validated/created.")
-
+	// Block main process thread until system interrupt (Ctrl+C / Docker Stop)
+	<-ctx.Done()
+	log.Println("Scheduler service shut down completely.")
 }
