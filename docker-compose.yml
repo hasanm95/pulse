@@ -26,8 +26,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -86,6 +86,7 @@ services:
       - MONITOR_CONFIG_PROTO_PATH=/proto/monitor-config.proto
       - MONITOR_CONFIG_SERVICE_URL=0.0.0.0:50052
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${MONITOR_CONFIG_DB_NAME}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@localhost:5672
     depends_on:
       db:
         condition: service_healthy
