@@ -16,12 +16,13 @@ import {
   UpdateMonitorInput,
 } from './monitor.types.js';
 import { GrpcValidationPipe } from '../common/pipes/grpc-validation.pipe.js';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Controller()
 export class MonitorController {
   constructor(
     private readonly monitorService: MonitorService,
-    @Inject('RABBITMQ_CLIENT') private readonly client: ClientProxy
+    private readonly amqp: AmqpConnection,
   ) {}
 
   @GrpcMethod('MonitorConfigService', 'HealthCheck')
@@ -53,7 +54,9 @@ export class MonitorController {
     };
 
     const newMonitor = await this.monitorService.createMonitor(input);
-    this.client.emit('monitor.created', newMonitor)
+    await this.amqp.publish('monitor_events', 'monitor.created', newMonitor);
+
+    console.log("New Monitor created ", newMonitor.id)
     return newMonitor
   }
 
@@ -119,8 +122,8 @@ export class MonitorController {
     };
 
     const updatedMonitor = await this.monitorService.updateMonitor(input);
-    this.client.emit('monitor.updated', updatedMonitor)
-
+    await this.amqp.publish('monitor_events', 'monitor.updated', updatedMonitor);
+    
     return updatedMonitor
   }
 
@@ -140,7 +143,7 @@ export class MonitorController {
     };
 
     await this.monitorService.deleteMonitor(input);
-    this.client.emit('monitor.deleted', {id: data.id, orgId: data.orgId})
+    await this.amqp.publish('monitor_events', 'monitor.deleted', {id: data.id, orgId: data.orgId});
 
     return {};
   }

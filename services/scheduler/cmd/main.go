@@ -58,7 +58,7 @@ func main() {
 					log.Println("RabbitMQ message channel closed.")
 					return
 				}
-				log.Printf("🔥 Received Event Payload: %s\n", string(d.Body))
+    			log.Printf("🔥 Raw Packet from NestJS: %s\n", string(d.Body))
 			}
 		}
 	}(ctx)

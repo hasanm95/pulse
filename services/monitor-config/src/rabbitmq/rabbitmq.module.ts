@@ -1,26 +1,20 @@
 import { Global, Module } from "@nestjs/common";
-import { ClientsModule, Transport } from "@nestjs/microservices";
+import { RabbitMQModule } from "@golevelup/nestjs-rabbitmq";
 
 @Global()
 @Module({
     imports: [
-        ClientsModule.register([
-            {
-                name: 'RABBITMQ_CLIENT',
-                transport: Transport.RMQ,
-                options: {
-                    urls: [process.env.RABBITMQ_URL || 'amqp://admin:securepassword123@rabbitmq:5672'],
-                    queue: '',
-                    queueOptions: {
-                        exchange: 'monitor_events',
-                        exchangeType: 'fanout',
-                        durable: true,
-                    },
-                }
-            }
-        ])
+        RabbitMQModule.forRoot({
+            exchanges: [
+                {
+                    name: 'monitor_events',
+                    type: 'fanout',
+                },
+            ],
+            uri:  process.env.RABBITMQ_URL || 'amqp://admin:securepassword123@rabbitmq:5672',
+            connectionInitOptions: { wait: true },
+        }),
     ],
-    exports: [ClientsModule],
+    exports: [RabbitMQModule], 
 })
-
 export class RabbitmqModule {}
