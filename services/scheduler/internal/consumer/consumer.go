@@ -15,7 +15,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 
 	rabbitChan, err := rabbitConn.Channel()
 	if err != nil {
-		rabbitChan.Close()
+		rabbitConn.Close()
 		log.Fatalf("Failed to open a RabbitMQ channel: %v", err)
 	}
 	log.Println("Successfully connected to RabbitMQ!")
