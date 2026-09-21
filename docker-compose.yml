@@ -123,8 +123,23 @@ services:
       - REDIS_ADDR=redis:6379
       - REDIS_PASS=${REDIS_PASS}
     depends_on:
-      db:
+      rabbitmq:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./services/worker-pool
+      dockerfile: dockerfile
+    volumes:
+      - ./services/worker-pool/:app
+      - /app/tmp
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASS=${REDIS_PASS}
+    depends_on:
       rabbitmq:
         condition: service_healthy
       redis:
