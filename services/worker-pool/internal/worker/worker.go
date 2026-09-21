@@ -77,7 +77,7 @@ func (w *PoolWorker) ProcessMessages(ctx context.Context, msgs <-chan amqp.Deliv
 				d.Ack(false)
 				continue
 			}
-
+			
 			targetURL := meta["url"]
 			if targetURL == "" {
 				targetURL = "https://httpbin.org"
@@ -107,7 +107,7 @@ func (w *PoolWorker) ProcessMessages(ctx context.Context, msgs <-chan amqp.Deliv
 				resp.Body.Close()
 			}
 
-			log.Printf("[Check Completed] Monitor: %s | Status: %s | Code: %d | Time: %dms", event.MonitorId, status, statusCode, responseTimeMs)
+			log.Printf("[Check Completed] Monitor: %s | Url %s | Status: %s | Code: %d | Time: %dms", event.MonitorId, targetURL, status, statusCode, responseTimeMs)
 
 			// 4. Construct and publish the telemetry completion payload
 			completionEvent := CheckCompletedPayload{

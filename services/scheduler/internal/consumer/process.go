@@ -48,7 +48,7 @@ func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery, store *sche
 					continue
 				}
 
-				if err := store.SaveSchedule(ctx, event.ID, event.IntervalSeconds); err != nil {
+				if err := store.SaveSchedule(ctx, event.ID, event.IntervalSeconds, event.URL, event.Type); err != nil {
 					log.Printf("Failed to commit schedule to Redis: %v", err)
 					d.Nack(false, true) // transient - requeue for retry
 					continue

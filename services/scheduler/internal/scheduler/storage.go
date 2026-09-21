@@ -18,9 +18,13 @@ func NewStorage (rdb *redis.Client) *Storage {
 	}
 }
 
-func (s *Storage) SaveSchedule(ctx context.Context, monitorID string, intervalSeconds int64) error {
+func (s *Storage) SaveSchedule(ctx context.Context, monitorID string, intervalSeconds int64, url string, monitorType string) error {
 	hashKey := fmt.Sprintf("monitor:meta:%s", monitorID)
-	if err := s.rdb.HSet(ctx, hashKey, "intervalSeconds", intervalSeconds).Err(); err != nil {
+	if err := s.rdb.HSet(ctx, hashKey, 
+		"intervalSeconds", intervalSeconds,
+		"url",             url,
+		"type",            monitorType,
+	).Err(); err != nil {
 		return  err
 	}
 
