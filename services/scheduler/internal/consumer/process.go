@@ -26,11 +26,11 @@ type MonitorDeletedPayload struct {
 
 func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery, store *scheduler.Storage) {
 	log.Println("Listening for fanout events...")
-	
+
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Stopping worker loop...")
+			log.Println("Stopping consumer loop...")
 			return
 		case d, ok := <-msgs:
 			if !ok {
@@ -42,38 +42,41 @@ func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery, store *sche
 			
 			case "monitor.created", "monitor.updated":
 				var event MonitorEventPayload
-				err := json.Unmarshal(d.Body, &event)
-				if err != nil {
-					log.Printf("Failed to parse write event JSON: %v", err)
+				if err := json.Unmarshal(d.Body, &event); err != nil {
+					log.Printf("Failed to parse monitor event data: %v", err)
+					d.Ack(false) // malformed forever
 					continue
 				}
-				
-				err = store.SaveSchedule(ctx, event.ID, event.IntervalSeconds)
-				if err != nil {
+
+				if err := store.SaveSchedule(ctx, event.ID, event.IntervalSeconds); err != nil {
 					log.Printf("Failed to commit schedule to Redis: %v", err)
+					d.Nack(false, true) // transient - requeue for retry
 					continue
 				}
+
 				log.Printf("Safely scheduled Monitor %s in Redis (Interval: %ds)", event.ID, event.IntervalSeconds)
-				
+				d.Ack(false)
 
 			case "monitor.deleted":
 				var event MonitorDeletedPayload
-				err := json.Unmarshal(d.Body, &event)
-				if err != nil {
-					log.Printf("Failed to parse delete event JSON: %v", err)
+				if err := json.Unmarshal(d.Body, &event); err != nil {
+					log.Printf("Failed to parse delete event data: %v", err)
+					d.Ack(false)
 					continue
 				}
-				
-				err = store.RemoveSchedule(ctx, event.ID)
-				if err != nil {
+
+				if err := store.RemoveSchedule(ctx, event.ID); err != nil {
 					log.Printf("Failed to remove schedule from Redis: %v", err)
+					d.Nack(false, true)
 					continue
 				}
+
 				log.Printf("Safely removed Monitor %s from Redis tracking pool", event.ID)
-				
+				d.Ack(false)
 
 			default:
-				log.Printf("Received unknown routing event key: %s", d.RoutingKey)
+				log.Printf("Received unrecognized event routing key: %s", d.RoutingKey)
+				d.Ack(false)
 			}
 		}
 	}
