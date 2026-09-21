@@ -131,9 +131,9 @@ services:
   worker:
     build:
       context: ./services/worker-pool
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     volumes:
-      - ./services/worker-pool/:app
+      - ./services/worker-pool:/app
       - /app/tmp
     environment:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
