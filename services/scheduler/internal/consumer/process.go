@@ -74,6 +74,9 @@ func ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery, store *sche
 				log.Printf("Safely removed Monitor %s from Redis tracking pool", event.ID)
 				d.Ack(false)
 
+			case "check.requested":
+				d.Ack(false) // The scheduler can ignore this since it was the one who sent it.
+
 			default:
 				log.Printf("Received unrecognized event routing key: %s", d.RoutingKey)
 				d.Ack(false)
