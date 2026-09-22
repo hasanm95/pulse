@@ -5,6 +5,7 @@ go 1.25.11
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/jackc/pgx/v5 v5.11.0
+	github.com/rabbitmq/amqp091-go v1.15.0
 )
 
 require (
