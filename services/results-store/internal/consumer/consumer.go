@@ -21,9 +21,13 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 	}
 
 	exchangeName := "check_events"
-	queueName := "results_store_log_queue"
+	if err := rabbitChan.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil); err != nil {
+		rabbitChan.Close()
+		rabbitConn.Close()
+		log.Fatalf("[worker] failed to declare exchange: %v", err)
+	}
 
-	// 1. Declare the persistent logging queue
+	queueName := "results_store_log_queue"
 	q, err := rabbitChan.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		rabbitChan.Close()
@@ -31,7 +35,6 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 		log.Fatalf("[Results Store] failed to declare results log queue: %v", err)
 	}
 
-	// 2. Bind the queue to listen ONLY for 'check.completed' events on check_events exchange
 	err = rabbitChan.QueueBind(q.Name, "check.completed", exchangeName, false, nil)
 	if err != nil {
 		rabbitChan.Close()

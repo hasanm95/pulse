@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	DatabaseURL string `env:"DATABASE_URL,required"`
-	RabbitMQURL string `env:"DATABASE_URL,required"`
+	RabbitMQURL string `env:"RABBITMQ_URL,required"`
 }
 
 func Load() (*Config, error) {

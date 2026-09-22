@@ -28,7 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer pool.Close()
-	log.Println("Database connected")
+	log.Println("[Results store] Database connected")
 
 	rabbitConn, rabbitChan, msgs := consumer.Start(ctx, cfg.RabbitMQURL)
 	defer rabbitConn.Close()
