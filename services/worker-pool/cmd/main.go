@@ -7,9 +7,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/hasanm95/pulsse/services/worker-pool/internal/config"
-	"github.com/hasanm95/pulsse/services/worker-pool/internal/consumer"
-	"github.com/hasanm95/pulsse/services/worker-pool/internal/worker"
+	"github.com/hasanm95/pulse/services/worker-pool/internal/config"
+	"github.com/hasanm95/pulse/services/worker-pool/internal/consumer"
+	"github.com/hasanm95/pulse/services/worker-pool/internal/worker"
 	"github.com/redis/go-redis/v9"
 )
 

@@ -1,4 +1,4 @@
-module github.com/hasanm95/pulsse/services/worker-pool
+module github.com/hasanm95/pulse/services/worker-pool
 
 go 1.25.3
 
