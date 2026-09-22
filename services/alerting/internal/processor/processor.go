@@ -105,6 +105,7 @@ func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.D
 			}
 
 			// 3. Commit state changes back to PostgreSQL
+			log.Println("commit update ==>", state)
 			if err := p.repo.UpdateState(ctx, state); err != nil {
 				log.Printf("[Alerting] Failed to sync updated monitor state data: %v", err)
 				d.Nack(false, true)
@@ -118,8 +119,8 @@ func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.D
 
 func (p *AlertProcessor) dispatchAlertNotification(monitorID string, eventType string, failureStreak int) {
 	if eventType == "down" {
-		log.Printf("📧 [ALERT SYSTEM DISPATCHED] -> TO: Team Admins | SUBJECT: Outage Alert! | MSG: Monitor %s has failed %d times consecutively. Endpoint is unreachable.", monitorID, failureStreak)
+		log.Printf("[ALERT SYSTEM DISPATCHED] -> TO: Team Admins | SUBJECT: Outage Alert! | MSG: Monitor %s has failed %d times consecutively. Endpoint is unreachable.", monitorID, failureStreak)
 	} else if eventType == "recovered" {
-		log.Printf("📧 [ALERT SYSTEM DISPATCHED] -> TO: Team Admins | SUBJECT: System Recovered | MSG: Monitor %s is responding successfully again. Incident closed.", monitorID)
+		log.Printf("[ALERT SYSTEM DISPATCHED] -> TO: Team Admins | SUBJECT: System Recovered | MSG: Monitor %s is responding successfully again. Incident closed.", monitorID)
 	}
 }

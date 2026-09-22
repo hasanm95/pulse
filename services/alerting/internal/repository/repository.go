@@ -26,7 +26,7 @@ func NewAlertingRepository(pool *pgxpool.Pool) *AlertingRepository {
 }
 
 func (r *AlertingRepository) GetOrCreateState(ctx context.Context, monitorID string) (*MonitorState, error) {
-	query := `SELECT monitor_id, last_status, failure_count, active_incident_id FROM monitor_states WHERE monitor_id = $1`
+	query := `SELECT monitor_id, last_status, failure_count, active_incident_id FROM monitor_states WHERE monitor_id = $1;`
 
 	var state MonitorState
 	err := r.pool.QueryRow(ctx, query, monitorID).Scan(
@@ -36,12 +36,14 @@ func (r *AlertingRepository) GetOrCreateState(ctx context.Context, monitorID str
 		&state.ActiveIncidentID,
 	)
 
-	if errors.Is(err, sql.ErrNoRows) || err.Error() == "no rows in result set" {
+	if err != nil && (errors.Is(err, sql.ErrNoRows) || err.Error() == "no rows in result set") {
 		return &MonitorState{
 			MonitorID:    monitorID,
 			LastStatus:   "up",
 			FailureCount: 0,
 		}, nil
+	} else if err != nil {
+		return nil, err
 	}
 
 	return &state, nil
@@ -53,8 +55,8 @@ func (r *AlertingRepository) UpdateState(ctx context.Context, state *MonitorStat
 		INSERT INTO	monitor_states (monitor_id, last_status, failure_count, active_incident_id, updated_at)
 		VALUES ($1, $2, $3, $4, NOW())
 		ON CONFLICT (monitor_id) DO UPDATE SET 
-			last_status = EXCLUDED.last_status
-			failure_count = EXCLUDED.failure_count,
+			last_status = EXCLUDED.last_status,
+			failure_count = $3,
 			active_incident_id = EXCLUDED.active_incident_id,
 			updated_at = NOW();
 	`
@@ -73,10 +75,10 @@ func (r *AlertingRepository) UpdateState(ctx context.Context, state *MonitorStat
 // OpenIncident records a new trackable historical downtime incident event block
 func (r *AlertingRepository) OpenIncident(ctx context.Context, monitorID string) (string, error) {
 	var incidentID string
-	query := `
+query := `
 		INSERT INTO incidents (monitor_id, started_at, status)
-		VALUES ($1, $2, 'open')
-		RETURNING id
+		VALUES ($1, NOW(), 'open')
+		RETURNING id;
 	`
 	err := r.pool.QueryRow(ctx, query,  monitorID).Scan(incidentID)
 	
@@ -88,9 +90,9 @@ func (r *AlertingRepository) CloseIncident(ctx context.Context, incidentID strin
 	query := `
 		UPDATE incidents 
 		SET resolved_at = NOW(), status = 'resolved'
-		WHERE id = $1
+		WHERE id = $1;
 	`
 	_, err := r.pool.Exec(ctx, query, incidentID)
-	
+
 	return  err
 }
