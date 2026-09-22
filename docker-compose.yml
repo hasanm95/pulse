@@ -7,6 +7,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - AUTH_DB_NAME=${AUTH_DB_NAME}
       - MONITOR_CONFIG_DB_NAME=${MONITOR_CONFIG_DB_NAME}
+      - RESULTS_STORE_DB_NAME=${RESULTS_STORE_DB_NAME}
     ports:
       - "5433:5432"
     volumes:
@@ -153,7 +154,7 @@ services:
       - /app/tmp
     environment:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${MONITOR_CONFIG_DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${RESULTS_STORE_DB_NAME}
     depends_on:
       db:
         condition: service_healthy
