@@ -8,13 +8,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(ctx context.Context, databaseURL string) (*pgxpool.Pool, error) {
+func New(ctx context.Context, databaseURL string)(*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("[Results store] failed to create connection pool: %v", err)
+		return nil, fmt.Errorf("[Alerting] failed to create connection pool: %v", err)
 	}
-
-	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	
+	pingCtx, cancel := context.WithTimeout(ctx, 5 * time.Second)
 	defer cancel()
 
 	if err := pool.Ping(pingCtx); err != nil {
