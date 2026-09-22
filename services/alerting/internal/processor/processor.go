@@ -105,7 +105,6 @@ func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.D
 			}
 
 			// 3. Commit state changes back to PostgreSQL
-			log.Println("commit update ==>", state)
 			if err := p.repo.UpdateState(ctx, state); err != nil {
 				log.Printf("[Alerting] Failed to sync updated monitor state data: %v", err)
 				d.Nack(false, true)

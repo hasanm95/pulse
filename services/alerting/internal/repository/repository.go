@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -74,16 +75,37 @@ func (r *AlertingRepository) UpdateState(ctx context.Context, state *MonitorStat
 
 // OpenIncident records a new trackable historical downtime incident event block
 func (r *AlertingRepository) OpenIncident(ctx context.Context, monitorID string) (string, error) {
-	var incidentID string
-query := `
+	query := `
 		INSERT INTO incidents (monitor_id, started_at, status)
 		VALUES ($1, NOW(), 'open')
-		RETURNING id;
+		RETURNING id::text;
 	`
-	err := r.pool.QueryRow(ctx, query,  monitorID).Scan(incidentID)
 	
-	return incidentID, err
+	rows, err := r.pool.Query(ctx, query, monitorID)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	var incidentID string
+	if rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return "", err
+		}
+		
+		if len(values) > 0 {
+			incidentID = fmt.Sprintf("%v", values[0])
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return "", err
+	}
+
+	return incidentID, nil
 }
+
 
 // CloseIncident marks an ongoing incident resolved as the endpoint recovers
 func (r *AlertingRepository) CloseIncident(ctx context.Context, incidentID string) error {

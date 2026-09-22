@@ -21,7 +21,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 	}
 
 	exchangeName := "check_events"
-	if err := rabbitChan.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil); err != nil {
+	if err := rabbitChan.ExchangeDeclare(exchangeName, "topic", true, false, false, false, nil); err != nil {
 		rabbitChan.Close()
 		rabbitConn.Close()
 		log.Fatalf("[worker] failed to declare exchange: %v", err)
@@ -35,7 +35,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 		log.Fatalf("failed to declare a queue: %v", err)
 	}
 
-	if err := rabbitChan.QueueBind(q.Name, "", exchangeName, false, nil); err != nil {
+	if err := rabbitChan.QueueBind(q.Name, "check.requested", exchangeName, false, nil); err != nil {
 		rabbitChan.Close()
 		rabbitConn.Close()
 		log.Fatalf("failed to bind queue: %v", err)

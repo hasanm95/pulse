@@ -23,7 +23,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 	exchangeName := "check_events"
 	queueName := "alerting_processor_queue"
 
-	if err := rabbitChan.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil); err != nil {
+	if err := rabbitChan.ExchangeDeclare(exchangeName, "topic", true, false, false, false, nil); err != nil {
 		rabbitChan.Close()
 		rabbitConn.Close()
 		log.Fatalf("[Alerting] Failed to declare check_events exchange: %v", err)
