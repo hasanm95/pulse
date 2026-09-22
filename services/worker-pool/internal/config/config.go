@@ -12,6 +12,7 @@ type Config struct {
 	RabbitMQURL string `env:"RABBITMQ_URL,required"`
 	RedisAddr string `env:"REDIS_ADDR,required"`
 	RedisPass string `env:"REDIS_PASS,required"`
+	WorkerConcurrency int    `env:"WORKER_CONCURRENCY" envDefault:"5"`
 }
 
 func Load()(*Config, error) {

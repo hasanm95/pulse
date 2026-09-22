@@ -20,6 +20,13 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 		log.Fatalf("[worker] failed to open a RabbitMQ channel: %v", err)
 	}
 
+	exchangeName := "check_events"
+	if err := rabbitChan.ExchangeDeclare(exchangeName, "fanout", true, false, false, false, nil); err != nil {
+		rabbitChan.Close()
+		rabbitConn.Close()
+		log.Fatalf("[worker] failed to declare exchange: %v", err)
+	}
+
 	queueName := "monitor_checks_queue"
 	q, err := rabbitChan.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
@@ -28,9 +35,7 @@ func Start(ctx context.Context, url string) (*amqp.Connection, *amqp.Channel, <-
 		log.Fatalf("failed to declare a queue: %v", err)
 	}
 
-	exchangeName := "monitor_events"
-	err = rabbitChan.QueueBind(q.Name, "check.requested", exchangeName, false, nil)
-	if err != nil {
+	if err := rabbitChan.QueueBind(q.Name, "", exchangeName, false, nil); err != nil {
 		rabbitChan.Close()
 		rabbitConn.Close()
 		log.Fatalf("failed to bind queue: %v", err)

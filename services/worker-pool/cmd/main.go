@@ -14,8 +14,7 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	cfg, err := config.Load()
@@ -29,27 +28,44 @@ func main() {
 		Password: cfg.RedisPass,
 		DB:       0,
 	})
-
 	if _, err := rdb.Ping(ctx).Result(); err != nil {
 		log.Fatalf("[Worker] failed to connect redis: %v", err)
 	}
-	log.Println("Successfully connected to Redis!")
+	log.Println("[Worker] Successfully connected to Redis!")
 
-	rabbitConn, rabbitChan, msgs := consumer.Start(ctx, cfg.RabbitMQURL)
+	rabbitConn, consumeCh, msgs := consumer.Start(ctx, cfg.RabbitMQURL)
 	defer rabbitConn.Close()
-	defer rabbitChan.Close()
+	defer consumeCh.Close()
 
-	poolWorker := worker.NewPoolWorker(rdb, rabbitChan)
+	// Configure QoS Prefetch Limit to control how many tasks this container buffers
+	numWorkers := cfg.WorkerConcurrency
+	if numWorkers < 1 {
+		numWorkers = 1
+	}
+	if err := consumeCh.Qos(numWorkers, 0, false); err != nil {
+		log.Fatalf("[Worker] failed to set QoS: %v", err)
+	}
+
+	// One dedicated publish channel for the whole application is safe and high-performance
+	publishCh, err := rabbitConn.Channel()
+	if err != nil {
+		log.Fatalf("[Worker] failed to open publish channel: %v", err)
+	}
+	defer publishCh.Close()
+
+	// Single worker controller instance
+	poolWorker := worker.NewPoolWorker(rdb, publishCh, numWorkers)
+
 	var wg sync.WaitGroup
-
 	wg.Add(1)
-	go func(ctx context.Context) {
+	go func() {
 		defer wg.Done()
+		// Let the worker internally handle spawning concurrent tasks
 		poolWorker.ProcessMessages(ctx, msgs)
-	}(ctx)
+	}()
 
 	<-ctx.Done()
 	log.Println("[Worker] Shutdown signal received, waiting for in-flight work to finish...")
 	wg.Wait()
-	log.Println("Worker service shut down completely.")
+	log.Println("[Worker] Worker service shut down completely.")
 }

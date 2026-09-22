@@ -49,6 +49,10 @@ func main() {
 	}
 	defer publishCh.Close()
 
+	if err := publishCh.ExchangeDeclare("check_events", "fanout", true, false, false, false, nil); err != nil {
+		log.Fatalf("Failed to declare check_events exchange: %v", err)
+	}
+
 	engine := scheduler.NewEngine(rdb, publishCh)
 
 	var wg sync.WaitGroup

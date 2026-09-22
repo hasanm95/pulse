@@ -139,6 +139,7 @@ services:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
       - REDIS_ADDR=redis:6379
       - REDIS_PASS=${REDIS_PASS}
+      - WORKER_CONCURRENCY=5
     depends_on:
       rabbitmq:
         condition: service_healthy

@@ -86,10 +86,17 @@ func (e *Engine) processDueMonitors(ctx context.Context) {
 		dedupKey := fmt.Sprintf("check:%s:%d", monitorID, now)
 		jsonPayload := fmt.Sprintf(`{"monitorId":"%s","dedupKey":"%s","requestedAt":%d}`, monitorID, dedupKey, now)
 
-		err = e.ch.PublishWithContext(ctx, "monitor_events", "check.requested", false, false, amqp.Publishing{
-			ContentType: "application/json",
-			Body:        []byte(jsonPayload),
-		})
+		err = e.ch.PublishWithContext(
+			ctx,
+			"check_events",
+			"check.requested",
+			false,
+			false,
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        []byte(jsonPayload),
+			},
+		)
 
 		if err != nil {
 			log.Printf("Failed to broadcast check execution request for Monitor %s: %v", monitorID, err)
