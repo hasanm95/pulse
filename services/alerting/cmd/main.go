@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/hasanm95/pulse/services/alerting/internal/config"
+	"github.com/hasanm95/pulse/services/alerting/internal/consumer"
 	"github.com/hasanm95/pulse/services/alerting/internal/database"
 )
 
@@ -25,4 +26,8 @@ func main() {
 	}
 	defer pool.Close()
 	log.Println("[Alerting] Database connected")
+
+	rabbitConn, rabbitChan, msgs := consumer.Start(ctx, cfg.RabbitMQURL)
+	defer rabbitConn.Close()
+	defer rabbitChan.Close()
 }
