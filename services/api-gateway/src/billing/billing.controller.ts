@@ -40,9 +40,9 @@ export class BillingController implements OnModuleInit {
         return this.billingService.subscribe({
             orgId,
             email,
-            planId: dto.planId,
-            successUrl: dto.successUrl,
-            cancelUrl: dto.cancelUrl
+            planId: dto.plan_id,
+            successUrl: dto.success_url,
+            cancelUrl: dto.cancel_url
         })
     }
 

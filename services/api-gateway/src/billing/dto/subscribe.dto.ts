@@ -2,11 +2,11 @@ import { IsUrl, IsUUID } from "class-validator";
 
 export class SubscribeDto {
     @IsUUID()
-    planId!: string;
+    plan_id!: string;
 
     @IsUrl()
-    successUrl!: string;
+    success_url!: string;
 
     @IsUrl()
-    cancelUrl!: string;
+    cancel_url!: string;
 }
