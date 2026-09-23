@@ -27,12 +27,13 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 		orgID        string
 		passwordHash string
 		role         string
+		email        string
 	)
 
 	err := s.pool.QueryRow(ctx,
-		`SELECT id, org_id, password_hash, role FROM users WHERE email = $1`,
+		`SELECT id, org_id, password_hash, role, email FROM users WHERE email = $1`,
 		req.Email,
-	).Scan(&userID, &orgID, &passwordHash, &role)
+	).Scan(&userID, &orgID, &passwordHash, &role, &email)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -45,7 +46,7 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 		return nil, status.Error(codes.Unauthenticated, "invalid email or password")
 	}
 
-	accessToken, err := s.generateAccessToken(userID, orgID, role)
+	accessToken, err := s.generateAccessToken(userID, orgID, role, email)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate access token")
 	}
@@ -70,11 +71,12 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 	}, nil
 }
 
-func (s *Server) generateAccessToken(userID, orgID, role string) (string, error) {
+func (s *Server) generateAccessToken(userID, orgID, role, email string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"org_id":  orgID,
 		"role":    role,
+		"email":   email,
 		"exp":     time.Now().Add(accessTokenTTL).Unix(),
 	}
 

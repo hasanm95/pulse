@@ -39,11 +39,16 @@ func (s *Server) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest
 	if !ok {
 		return nil, status.Error(codes.Internal, "role is missing")
 	}
+	email, ok := claims["email"].(string)
+	if !ok {
+		return nil, status.Error(codes.Internal, "emal is missing")
+	}
 
 	return &pb.ValidateTokenResponse{
 		UserId: userID,
 		OrgId:  orgID,
 		Role:   role,
+		Email: email,
 	}, nil
 }
 

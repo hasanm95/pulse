@@ -52,6 +52,7 @@ export class AuthGuard implements CanActivate, OnModuleInit {
             userId: result.userId,
             orgId: result.orgId,
             role: result.role,
+            email: result.email
         };
 
         return true;

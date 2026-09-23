@@ -21,17 +21,17 @@ func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) 
 	}
 	defer tx.Rollback(ctx)
 
-	var userID, orgID, role string
+	var userID, orgID, role, email string
 
 	err = tx.QueryRow(ctx,
-		`SELECT users.id, users.org_id, users.role
+		`SELECT users.id, users.org_id, users.role, users.email,
 		 FROM refresh_tokens
 		 JOIN users ON users.id = refresh_tokens.user_id
 		 WHERE refresh_tokens.token_hash = $1
 		   AND refresh_tokens.expires_at > now()
 		 FOR UPDATE`,
 		hash,
-	).Scan(&userID, &orgID, &role)
+	).Scan(&userID, &orgID, &role, &email)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -65,7 +65,7 @@ func (s *Server) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) 
 		return nil, status.Error(codes.Internal, "failed to store refresh token")
 	}
 
-	accessToken, err := s.generateAccessToken(userID, orgID, role)
+	accessToken, err := s.generateAccessToken(userID, orgID, role, email)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate access token")
 	}

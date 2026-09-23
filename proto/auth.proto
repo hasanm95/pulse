@@ -56,6 +56,7 @@ message ValidateTokenResponse {
   string user_id = 1;
   string org_id = 2;
   string role = 3;
+  string email = 4;
 }
 
 service AuthService {

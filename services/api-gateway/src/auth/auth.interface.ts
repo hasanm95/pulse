@@ -53,6 +53,7 @@ export interface ValidateTokenResponse {
    userId: string;
    orgId: string;
    role: string;
+   email: string;
 }
 
 export interface AuthServiceClient {

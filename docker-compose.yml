@@ -10,6 +10,7 @@ services:
       - RESULTS_STORE_DB_NAME=${RESULTS_STORE_DB_NAME}
       - ALERTING_DB_NAME=${ALERTING_DB_NAME}
       - STATUS_PAGE_DB_NAME=${STATUS_PAGE_DB_NAME}
+      - BILLING_DB_NAME=${BILLING_DB_NAME}
     ports:
       - "5433:5432"
     volumes:
