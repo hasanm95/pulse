@@ -35,6 +35,19 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           },
         }),
       },
+      {
+        name: 'BILLING_PACKAGE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: 'billing',
+            protoPath: configService.get('BILLING_PROTO_PATH', '/proto/billing.proto'),
+            url: configService.get<string>('BILLING_SERVICE_URL', 'localhost:50054'),
+          },
+        }),
+      },
     ]),
   ],
   exports: [ClientsModule],

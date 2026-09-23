@@ -4,9 +4,10 @@ import { CommonModule } from './common/common.module.js';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './common/guards/auth.guard.js';
 import { MonitorConfigModule } from './monitor-config/monitor.module.js';
+import { BillingModule } from './billing/billing.module.js';
 
 @Module({
-  imports: [CommonModule, AuthModule, MonitorConfigModule],
+  imports: [CommonModule, AuthModule, MonitorConfigModule, BillingModule],
   controllers: [],
   providers: [
     {
