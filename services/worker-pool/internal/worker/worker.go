@@ -21,6 +21,7 @@ type CheckEventPayload struct {
 
 type CheckCompletedPayload struct {
 	MonitorID      string `json:"monitorId"`
+	DedupKey       string `json:"dedupKey"`
 	Status         string `json:"status"`
 	StatusCode     int    `json:"statusCode"`
 	ResponseTimeMs int64  `json:"responseTimeMs"`
@@ -147,6 +148,7 @@ func (w *PoolWorker) executeCheck(ctx context.Context, d amqp.Delivery, client *
 	// 4. Construct and publish the telemetry completion payload to 'check_events'
 	completionEvent := CheckCompletedPayload{
 		MonitorID:      event.MonitorId,
+		DedupKey:       event.DedupKey,
 		Status:         status,
 		StatusCode:     statusCode,
 		ResponseTimeMs: responseTimeMs,

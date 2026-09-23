@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,6 +27,18 @@ func NewAlertingRepository(pool *pgxpool.Pool) *AlertingRepository {
 	}
 }
 
+func (r *AlertingRepository) MarkEventProcessed(ctx context.Context, dedupKey string) (bool, error) {
+	tag, err := r.pool.Exec(ctx,
+		`INSERT INTO processed_check_events (dedup_key) VALUES ($1) ON CONFLICT (dedup_key) DO NOTHING`,
+		dedupKey,
+	)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
+
 func (r *AlertingRepository) GetOrCreateState(ctx context.Context, monitorID string) (*MonitorState, error) {
 	query := `SELECT monitor_id, last_status, failure_count, active_incident_id FROM monitor_states WHERE monitor_id = $1;`
 
@@ -37,18 +50,20 @@ func (r *AlertingRepository) GetOrCreateState(ctx context.Context, monitorID str
 		&state.ActiveIncidentID,
 	)
 
-	if err != nil && (errors.Is(err, sql.ErrNoRows) || err.Error() == "no rows in result set") {
-		return &MonitorState{
-			MonitorID:    monitorID,
-			LastStatus:   "up",
-			FailureCount: 0,
-		}, nil
-	} else if err != nil {
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return &MonitorState{
+				MonitorID:    monitorID,
+				LastStatus:   "up",
+				FailureCount: 0,
+			}, nil
+		}
 		return nil, err
 	}
 
 	return &state, nil
 }
+
 
 // UpdateState updates the running operational metrics baseline
 func (r *AlertingRepository) UpdateState(ctx context.Context, state *MonitorState) error {
@@ -57,7 +72,7 @@ func (r *AlertingRepository) UpdateState(ctx context.Context, state *MonitorStat
 		VALUES ($1, $2, $3, $4, NOW())
 		ON CONFLICT (monitor_id) DO UPDATE SET 
 			last_status = EXCLUDED.last_status,
-			failure_count = $3,
+			failure_count = EXCLUDED.failure_count,
 			active_incident_id = EXCLUDED.active_incident_id,
 			updated_at = NOW();
 	`

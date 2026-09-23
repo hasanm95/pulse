@@ -1,0 +1,1 @@
+ALTER TABLE monitor_results DROP COLUMN dedup_key;

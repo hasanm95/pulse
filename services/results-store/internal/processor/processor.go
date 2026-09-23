@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
@@ -11,11 +12,12 @@ import (
 )
 
 type CheckCompletedEvent struct {
-	MonitorID string `json:"monitorId"`
-	Status string `json:"status"`
-	StatusCode int `json:"statusCode"`
-	ResponseTimeMs int64 `json:"responseTimeMs"`
-	CheckedAt int64 `json:"checkedAt"`
+	MonitorID      string `json:"monitorId"`
+	DedupKey       string `json:"dedupKey"`
+	Status         string `json:"status"`
+	StatusCode     int    `json:"statusCode"`
+	ResponseTimeMs int64  `json:"responseTimeMs"`
+	CheckedAt      int64  `json:"checkedAt"`
 }
 
 type ResultsPocessor struct {
@@ -28,9 +30,9 @@ func NewResultsPorcessor(repo *repository.ResultRepository) *ResultsPocessor {
 
 func (p *ResultsPocessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery) {
 	log.Println("[Results Store] Listening for check.completed telemetry events...")
-	
+
 	for {
-		select{
+		select {
 		case <-ctx.Done():
 			log.Println("Stopping Results Store message logging loop...")
 			return
@@ -39,6 +41,7 @@ func (p *ResultsPocessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.
 				log.Println("RabbitMQ message channel closed unexpectedly.")
 				return
 			}
+
 			var event CheckCompletedEvent
 			if err := json.Unmarshal(d.Body, &event); err != nil {
 				log.Printf("Failed to parse check completed json payload: %v", err)
@@ -47,18 +50,26 @@ func (p *ResultsPocessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.
 			}
 
 			record := repository.MonitorResultRecord{
-				MonitorID: event.MonitorID,
-				Status: event.Status,
-				StatusCode: event.StatusCode,
+				MonitorID:      event.MonitorID,
+				DedupKey:       event.DedupKey,
+				Status:         event.Status,
+				StatusCode:     event.StatusCode,
 				ResponseTimeMs: event.ResponseTimeMs,
-				CheckedAt: time.Unix(event.CheckedAt, 0),
+				CheckedAt:      time.Unix(event.CheckedAt, 0),
 			}
 
-			if err := p.repo.SaveResult(ctx, &record); err != nil {
-				log.Printf("Failed to commit metric log to PostgreSQL: %v", err)
-				d.Nack(false, true) // Requeue on transient DB infrastructure failures
+			err := p.repo.SaveResult(ctx, &record)
+			if errors.Is(err, repository.ErrDuplicateResult) {
+				log.Printf("[Duplicate Dropped] Monitor: %s | DedupKey: %s already recorded", record.MonitorID, record.DedupKey)
+				d.Ack(false)
 				continue
 			}
+			if err != nil {
+				log.Printf("Failed to commit metric log to PostgreSQL: %v", err)
+				d.Nack(false, true)
+				continue
+			}
+
 			log.Printf("[Results Logged] Monitor: %s | Status: %s | Latency: %dms", record.MonitorID, record.Status, record.ResponseTimeMs)
 			d.Ack(false)
 		}

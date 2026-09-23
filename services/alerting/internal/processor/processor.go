@@ -12,6 +12,7 @@ import (
 
 type CheckCompletedEvent struct {
 	MonitorID      string `json:"monitorId"`
+	DedupKey       string `json:"dedupKey"`
 	Status         string `json:"status"`
 	StatusCode     int    `json:"statusCode"`
 	ResponseTimeMs int64  `json:"responseTimeMs"`
@@ -26,11 +27,9 @@ func NewAlertProcessor(repo *repository.AlertingRepository) *AlertProcessor {
 	return &AlertProcessor{repo: repo}
 }
 
-// ProcessMessages continuously reads check results and handles the incident state transitions
 func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.Delivery) {
 	log.Println("[Alerting] Listening for check.completed events...")
-	
-	// Hardcoded rule threshold for this stage (Alert if failed 3 times consecutively)
+
 	const failureThreshold = 3
 
 	for {
@@ -51,23 +50,32 @@ func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.D
 				continue
 			}
 
-			// 1. Fetch current running historical state memory for this monitor
-			state, err := p.repo.GetOrCreateState(ctx, event.MonitorID)
+			isNew, err := p.repo.MarkEventProcessed(ctx, event.DedupKey)
 			if err != nil {
-				log.Printf("[Alerting] Failed to fetch state context from database: %v", err)
-				d.Nack(false, true) // Transient error - requeue task
+				log.Printf("[Alerting] Failed to check dedup state: %v", err)
+				d.Nack(false, true)
+				continue
+			}
+			if !isNew {
+				log.Printf("[Alerting] Duplicate check.completed event dropped: %s", event.DedupKey)
+				d.Ack(false)
 				continue
 			}
 
-			// 2. Evaluate State Status Matrix
+			state, err := p.repo.GetOrCreateState(ctx, event.MonitorID)
+			if err != nil {
+				log.Printf("[Alerting] Failed to fetch state context from database: %v", err)
+				d.Nack(false, true)
+				continue
+			}
+
 			if event.Status == "down" {
 				state.FailureCount++
 				state.LastStatus = "down"
 
-				// CRITICAL THRESHOLD TRIGGER: Crossed threshold and no active incident exists yet
 				if state.FailureCount >= failureThreshold && !state.ActiveIncidentID.Valid {
 					log.Printf("[OUTAGE DETECTED] Monitor %s failed %d times consecutively! Opening incident...", event.MonitorID, state.FailureCount)
-					
+
 					incidentID, err := p.repo.OpenIncident(ctx, event.MonitorID)
 					if err != nil {
 						log.Printf("[Alerting] Failed to log new incident entry to database: %v", err)
@@ -76,35 +84,26 @@ func (p *AlertProcessor) ProcessMessages(ctx context.Context, msgs <-chan amqp.D
 					}
 
 					state.ActiveIncidentID = sql.NullString{String: incidentID, Valid: true}
-					
-					// SIMULATE NOTIFICATION (Email, Webhook etc.)
 					p.dispatchAlertNotification(event.MonitorID, "down", state.FailureCount)
 				}
 			} else {
-				// RECOVERY MATCH: Check is healthy ("up")
-				
-				// If an ongoing incident was active, it means the website just recovered!
 				if state.ActiveIncidentID.Valid {
 					log.Printf("[RECOVERY DETECTED] Monitor %s is back UP! Resolving incident %s...", event.MonitorID, state.ActiveIncidentID.String)
-					
-					err := p.repo.CloseIncident(ctx, state.ActiveIncidentID.String)
-					if err != nil {
+
+					if err := p.repo.CloseIncident(ctx, state.ActiveIncidentID.String); err != nil {
 						log.Printf("[Alerting] Failed to resolve open database incident entry: %v", err)
 						d.Nack(false, true)
 						continue
 					}
-					
-					// SIMULATE NOTIFICATION (Recovery notice)
+
 					p.dispatchAlertNotification(event.MonitorID, "recovered", 0)
 				}
 
-				// Reset baseline state numbers
 				state.FailureCount = 0
 				state.LastStatus = "up"
 				state.ActiveIncidentID = sql.NullString{String: "", Valid: false}
 			}
 
-			// 3. Commit state changes back to PostgreSQL
 			if err := p.repo.UpdateState(ctx, state); err != nil {
 				log.Printf("[Alerting] Failed to sync updated monitor state data: %v", err)
 				d.Nack(false, true)

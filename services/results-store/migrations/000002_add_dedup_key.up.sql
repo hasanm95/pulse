@@ -1,0 +1,1 @@
+ALTER TABLE monitor_results ADD COLUMN dedup_key TEXT UNIQUE NOT NULL;
