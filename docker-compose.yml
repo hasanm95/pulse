@@ -9,6 +9,7 @@ services:
       - MONITOR_CONFIG_DB_NAME=${MONITOR_CONFIG_DB_NAME}
       - RESULTS_STORE_DB_NAME=${RESULTS_STORE_DB_NAME}
       - ALERTING_DB_NAME=${ALERTING_DB_NAME}
+      - STATUS_PAGE_DB_NAME=${STATUS_PAGE_DB_NAME}
     ports:
       - "5433:5432"
     volumes:
@@ -176,6 +177,26 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+  status-page:
+    build:
+      context: ./services/status-page
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/status-page:/app
+      - /app/node_modules
+    environment:
+      - PORT=3005
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${STATUS_PAGE_DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+    ports:
+      - "3005:3005"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 
 volumes:
   pgdata:
