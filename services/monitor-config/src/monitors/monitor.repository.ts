@@ -200,6 +200,19 @@ export class MonitorRepository {
     }
   }
 
+  async countByOrgId(orgId: string): Promise<number> {
+    try {
+        const result = await this.pool.query<{ count: string }>(
+            `SELECT COUNT(*) as count FROM monitors WHERE org_id = $1`,
+            [orgId],
+        );
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to count monitors:', error);
+        throw GrpcError.internal();
+    }
+  }
+
   private toMonitor(row: MonitorRow): Monitor {
     return {
       id: row.id,
