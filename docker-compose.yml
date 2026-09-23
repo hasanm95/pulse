@@ -196,7 +196,26 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-
+  billing:
+    build:
+      context: ./services/billing
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3006"
+      - "50054:50054"
+    volumes:
+      - ./services/billing:/app
+      - /app/node_modules
+      - ./proto:/proto:ro
+    environment:
+      - PORT=3006
+      - BILLING_GRPC_URL=0.0.0.0:50054
+      - BILLING_PROTO_PATH=/proto/billing.proto
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${BILLING_DB_NAME}
+      - PAYMENT_PROVIDER=mock
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:
